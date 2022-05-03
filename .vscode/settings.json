@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "memory": "cpp",
+        "streambuf": "cpp",
+        "fs.h": "c"
+    }
+}
