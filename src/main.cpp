@@ -1,9 +1,16 @@
 #include <Arduino.h>
 #include "Button.h"
 #include "Param.h"
-#include "Ecran.h"
+#include "eSprite_TDM.h"
+#include "eSprite_SHD.h"
+#include "eSprite_balleX1.h"
+#include "eSprite_balleX3.h"
+#include "eSprite_balleX5.h"
 #include <TFT_eSPI.h>
 #include <SPI.h>
+#include "Image.h"
+#include "Game_Audio.h"
+#include "Arme.h"
 
 enum EtatFini
 {
@@ -22,14 +29,25 @@ enum EtatFini
 };
 
 Button btnGachette(18);
-Button btnMode(21);
+Button btnMode(5, false);
+Button btnReload(21, false);
+Game_Audio_Class GameAudio(25, 0);
+
 EtatFini etat = Initial;
 Param param;
-Ecran ecranObj;
 bool changementEtat = true;
 bool bChoixFin = false;
 TFT_eSPI ecran = TFT_eSPI();
+// TFT_eSprite spr = TFT_eSprite(&ecran); // Sprite object graph1
+eSprite_TDM spr_tdm = eSprite_TDM(&ecran);
+eSprite_SHD spr_shd = eSprite_SHD(&ecran);
+eSprite_balleX1 spr_balleX1 = eSprite_balleX1(&ecran);
+eSprite_balleX3 spr_balleX3 = eSprite_balleX3(&ecran);
+eSprite_balleX5 spr_balleX5 = eSprite_balleX5(&ecran);
+int memoReste = -1;
 unsigned long memoMillis;
+
+Arme laser(&GameAudio);
 void setup()
 {
   Serial.begin(115200);
@@ -45,6 +63,9 @@ void setup()
     Serial.println("An Error has occurred while mounting SPIFFS");
     return;
   }
+
+  spr_tdm.init();
+  spr_shd.init();
 }
 
 void loop()
@@ -52,10 +73,16 @@ void loop()
 
   btnGachette.MAJ();
   btnMode.MAJ();
+  btnReload.MAJ();
   bool btnMode5s = false;
   if (btnGachette.relache)
   {
-    Serial.printf("Button 1 has been relache %u times %u ms\n", btnGachette.numberKeyPresses, btnGachette.dureeAction);
+    Serial.printf("Button gachette has been relache %u times %u ms\n", btnGachette.numberKeyPresses, btnGachette.dureeAction);
+  }
+
+  if (btnReload.relache)
+  {
+    Serial.printf("Button relaod has been relache %u times %u ms\n", btnReload.numberKeyPresses, btnReload.dureeAction);
   }
 
   if (btnMode.relache)
@@ -101,12 +128,35 @@ void loop()
     // Chargement du fichier
     break;
   case EnJeuAutonome:
-    if (changementEtat)
+
+    laser.setGachette(btnGachette.actionne);
+    laser.setChangementModeRelache(btnReload.relache);
+    laser.setChangementModeAppuye(btnReload.actionne);
+    laser.MAJ();
+
+    if (changementEtat || laser.changement)
     {
       ecran.fillScreen(TFT_BLACK);
-      ecran.drawCentreString("iN GAME", 80, 30, 2);
-      Serial.printf("IN GAME\n", btnMode.numberKeyPresses, btnMode.dureeAction);
+      // ecran.drawBitmap(40,40,testImg,4,7, (uint8_t)TFT_WHITE);
+      spr_tdm.pushSprite(0, 0);
+      spr_shd.pushSprite(0, 40);
 
+      switch (laser.mode)
+      {
+      case simple:
+        spr_balleX1.pushSprite(80, 0);
+        break;
+      case rafale:
+        spr_balleX3.pushSprite(80, 0);
+        break;
+      case automatique:
+        spr_balleX5.pushSprite(80, 0);
+        break;
+      }
+      // Sprite spr = new Sprite
+      // ecran.pushImage
+      // ecran.drawCentreString("IN GAME", 80, 30, 2);
+      Serial.printf("IN GAME\n", btnMode.numberKeyPresses, btnMode.dureeAction);
     }
     break;
   case MortAutonome:
@@ -121,9 +171,15 @@ void loop()
     }
     else
     {
-      ecran.fillScreen(TFT_BLACK);
+
       unsigned long delta = millis() - memoMillis;
-      switch (int((float)memoMillis / 1000.0f) % 4)
+      int reste = int((float)delta / 1000.0f) % 4;
+      if (memoReste != reste)
+      {
+        ecran.fillScreen(TFT_BLACK);
+        Serial.printf("%d\n", reste);
+        memoReste = reste;
+        switch (reste)
         {
         case 0:
           ecran.drawCentreString("Attendre wifi", 80, 30, 2);
@@ -142,6 +198,7 @@ void loop()
 
           break;
         }
+      }
     }
     break;
   case ConnecteAttenteOrdre:
@@ -228,7 +285,7 @@ void loop()
       else
       {
         Serial.printf("Equipe %d\n", param.team);
-        char str[50] ;
+        char str[50];
         sprintf(str, "Equipe n°%d\n", param.team);
         ecran.drawCentreString(str, 80, 40, 2);
       }
@@ -271,13 +328,11 @@ void loop()
       {
         Serial.printf("Retour : Oui\n");
         ecran.drawCentreString("Oui (et sauvegarder)", 80, 40, 2);
-      
       }
       else
       {
         Serial.printf("Retour : Non\n");
         ecran.drawCentreString("Non", 80, 40, 2);
-      
       }
     }
 

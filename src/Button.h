@@ -15,11 +15,11 @@ public:
   bool actionne;
   bool relache;
   uint32_t dureeAction;
+  int etatHaut = HIGH;
 
   Button(uint8_t _PIN);
   Button(uint8_t _PIN, bool modePullUp);
-  void Presse();
-  void CheckEtat();
+  void Presse(); 
   void MAJ();
   uint32_t DureeEtatEnCours();
 };
@@ -40,10 +40,13 @@ Button::Button(uint8_t _PIN, bool modePullUp)
   numberKeyPresses = 0;
   actionne = false;
   relache = true;
+  pinMode(PIN, INPUT_PULLUP);
   if (modePullUp == true)
-    pinMode(PIN, INPUT_PULLUP);
+   // pinMode(PIN, INPUT_PULLUP);
+   etatHaut = HIGH;
   else
-    pinMode(PIN, INPUT_PULLDOWN);
+    etatHaut = 0x0;
+    //pinMode(PIN, INPUT_PULLDOWN);
   dureeAction = 0;
 }
 
@@ -51,7 +54,7 @@ void Button::MAJ()
 {
   int etatBouton = digitalRead(PIN);
   
-  if (etatBouton == HIGH) // test si le bouton a un niveau logique HAUT
+  if (etatBouton == etatHaut) // test si le bouton a un niveau logique HAUT
   {
     if (actionne == false)
     {

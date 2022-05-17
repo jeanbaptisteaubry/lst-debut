@@ -3,6 +3,8 @@
         "*.tcc": "cpp",
         "memory": "cpp",
         "streambuf": "cpp",
-        "fs.h": "c"
+        "fs.h": "c",
+        "pgmspace.h": "c",
+        "random": "cpp"
     }
 }
