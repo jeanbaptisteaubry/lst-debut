@@ -73,10 +73,10 @@ public:
         veilleR = random(2, 255);
         veilleG = random(2, 255);
         veilleB = random(2, 255);
-        colorVeilleN =  ecran.color565(veilleR, veilleG, veilleB);
+        colorVeilleN = ecran.color565(veilleR, veilleG, veilleB);
         colorVeilleNm1 = ecran.color565(veilleR - 1, veilleG - 1, veilleB - 1);
         colorVeilleNm2 = ecran.color565(veilleR - 2, veilleG - 2, veilleB - 2);
-        Serial.printf("%d %d %d \n",colorVeilleN, colorVeilleNm1, colorVeilleNm2);
+        Serial.printf("%d %d %d \n", colorVeilleN, colorVeilleNm1, colorVeilleNm2);
     }
 
     void drawVeille()
@@ -162,14 +162,47 @@ public:
         setChange();
     }
 
+    /**
+     * @brief une action de type Arme à mettre en avant 
+     * 
+     * @param mode 
+     * @param etat 
+     * @param tempsRestantReload 
+     */
+    void afficherEcranJeuArme(modeTire mode, etatArme etat, float tempsRestantReload){
+        
+    }
+
+    /**
+     * @brief Une action fait évoluer l'armure et/ou la vie du joueur mais pas l'arme
+     * 
+     * @param armure 
+     * @param vie 
+     */
+    void afficherEcranJeuArmure(int armure, int vie){
+
+    }
+
+
+
+    /**
+     * @brief Affiche l'écran  de jeu sans activité mise en avant
+     * 
+     * @param armure 
+     * @param vie 
+     * @param munition 
+     * @param mode 
+     * @param etat 
+     * @param tempsRestantReload 
+     */
     void afficherEcranJeu(int armure, int vie, int munition, modeTire mode, etatArme etat, float tempsRestantReload)
     {
-        effacerEcran();
-        spr_tdm.pushSprite(0, 0);
-        spr_shd.pushSprite(0, 40);
 
         if (etat != rechargeChargeur)
         {
+            effacerEcran();
+            spr_tdm.pushSprite(0, 0);
+            spr_shd.pushSprite(0, 40);
 
             switch (mode)
             {
@@ -200,30 +233,26 @@ public:
             ecran.drawCentreString(str, 135, 10, 4);
         }
         else
-            afficher_tempsReload(tempsRestantReload);
-        //  Serial.printf("IN GAME\n", btnMode.numberKeyPresses, btnMode.dureeAction);
-        setChange();
-    }
-
-    void afficher_tempsReload(float restantS)
-    {
-
-        if (restantS != memoRestant)
         {
-            memoRestant = restantS;
-            spr_reload.pushSprite(80, 0);
-            ecran.drawRect(113, 0, 50, 35, TFT_BLACK);
-            char str[2];
+            if (tempsRestantReload != memoRestant)
+            {
+                effacerEcran();
+                spr_tdm.pushSprite(0, 0);
+                spr_shd.pushSprite(0, 40);
+                memoRestant = tempsRestantReload;
+                spr_reload.pushSprite(80, 0);
+                char str[2];
 
-            sprintf(str, "%d\n", restantS);
-
-            // Sprite spr = new Sprite
-            // ecran.pushImage
-            ecran.setTextColor(TFT_RED);
-            ecran.drawCentreString(str, 135, 10, 4);
-            ecran.setTextColor(TFT_WHITE);
-            Serial.printf("Reload %d\n", restantS);
-            setChange();
+                // Sprite spr = new Sprite
+                // ecran.pushImage
+                ecran.setTextColor(TFT_RED);
+                ecran.drawCentreString(str, 135, 10, 4);
+                ecran.setTextColor(TFT_WHITE);
+                Serial.printf("Reload %d\n", tempsRestantReload);
+                setChange();
+            }
         }
+        //  Serial.printf("IN GAME\n", btnMode.numberKeyPresses, btnMode.dureeAction);
+ 
     }
 };

@@ -98,6 +98,7 @@ void loop()
   switch (etat)
   {
   case Initial:
+#pragma region
     // Position du Setup ou autre
     ecran.effacerEcran();
     ecran.afficherCentrerNormal("Initialisation\n");
@@ -121,6 +122,7 @@ void loop()
 
     // Chargement du fichier
     break;
+#pragma endregion
   case EnJeuAutonome:
 
     laser.setGachette(btnGachette.actionne);
@@ -128,16 +130,25 @@ void loop()
     laser.setChangementModeAppuye(btnReload.actionne);
     laser.MAJ();
 
-    if (changementEtat || laser.changement)
+    if (changementEtat) // On vient de changer l'état
     {
       // ecran.drawBitmap(40,40,testImg,4,7, (uint8_t)TFT_WHITE);
       ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
     }
 
-    if (laser.etat == rechargeChargeur)
+    if (laser.changement || laser.etat == rechargeChargeur)
     {
-      ecran.afficher_tempsReload(((float)laser.getNb10emeSecRestantReload()) / 10);
+      //Un action sur l'arme, on bascule sur un affichage spécifique arme
+      ecran.afficherEcranJeuArme(laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
     }
+
+    if (!laser.changementAffichageFini)
+      if (laser.millisChangement - millis() > ecran.dureeAvantVeille)
+      {
+        //L'action sur l'arme est finie, on rebascule sur un affichage générique
+        ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
+        laser.changementAffichageFini = true;
+      }
 
     break;
   case MortAutonome:
@@ -333,7 +344,7 @@ void loop()
     changementEtat = false;
 
   ecran.checkVeille();
-  if(ecran.veilleEnCours)
+  if (ecran.veilleEnCours)
     ecran.drawVeille();
   // Detach Interrupt after 1 Minute
   /*static uint32_t lastMillis = 0;

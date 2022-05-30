@@ -1751,7 +1751,9 @@ public:
 	bool gachette = false;
 	bool changementModeRelache = false;
 	bool changementModeAppuye = false;
-	bool changement = false;
+	bool changement = false; // Un changement vient d'avoir lieu
+	bool changementAffichageFini = true; // L'intégration du dernier changement est finie
+	int millisChangement;
 	int longueurChargeur = 30;
 	int chargeur;
 	int dureeRechargement = 3000;
@@ -1771,6 +1773,16 @@ public:
 		longueurRafale = 3;
 	}
 
+	/**
+	 * @brief Indique qu'un changement a eu lieu sur le laser, et qu'il faudra l'afficher
+	 * 
+	 */
+	void setChangement()
+	{
+		changementAffichageFini = false;
+		changement = true;
+		millisChangement = millis();
+	}
 	void setGachette(bool _gachette)
 	{
 		// Serial.printf("gachette : %d \n", _gachette);
@@ -1817,7 +1829,7 @@ public:
 					Serial.println("Mode : Coup par coup");
 					break;
 				}
-				changement = true;
+				setChangement();
 			}
 			if (gachette)
 			{
@@ -1828,7 +1840,7 @@ public:
 					etat = rechargeChargeur;
 					GameAudio->StopPlaying();
 					memoMillis = millis();
-					changement = true;
+					setChangement();
 				}
 				else if (chargeur > 0)
 				{
@@ -1837,7 +1849,7 @@ public:
 					GameAudio->StopPlaying();
 					GameAudio->PlayWav(&sound_before, false, 1.0);
 					positionRafale = 0;
-					changement = true;
+					setChangement();
 					chargeur--;
 					Serial.println("chargement !");
 				}
@@ -1854,7 +1866,7 @@ public:
 				Serial.println("rechargement fini !");
 				// Todo : Faux trouver un son
 				etat = attente;
-				changement = true;
+				setChangement();
 				chargeur = longueurChargeur;
 			}
 			break;
@@ -1867,7 +1879,7 @@ public:
 				GameAudio->StopPlaying();
 				GameAudio->PlayWav(&sound_shoot, false, 1.0);
 				positionRafale = 1;
-				changement = true;
+				setChangement();
 				// IR Shoot
 				Serial.println("chargement fini, pan  !");
 			}
@@ -1883,7 +1895,7 @@ public:
 					etat = refroidissement;
 					GameAudio->StopPlaying();
 					GameAudio->PlayWav(&sound_after, false, 1.0);
-					changement = true;
+					setChangement();
 					Serial.println("tir fini,   !");
 				}
 				break;
@@ -1910,7 +1922,7 @@ public:
 						GameAudio->PlayWav(&sound_after, false, 1.0);
 						Serial.println("rafale finie   !");
 					}
-					changement = true;
+					setChangement();
 				}
 				break;
 			case automatique:
@@ -1931,7 +1943,7 @@ public:
 						GameAudio->StopPlaying();
 						GameAudio->PlayWav(&sound_after, false, 1.0);
 					}
-					changement = true;
+					setChangement();
 				}
 				break;
 			}
@@ -1945,7 +1957,7 @@ public:
 				memoMillis = millis();
 				etat = attente;
 				GameAudio->StopPlaying();
-				changement = true;
+				setChangement();
 				Serial.println("refroidissement fini   !");
 			}
 
@@ -1957,7 +1969,7 @@ public:
 				GameAudio->StopPlaying();
 				GameAudio->PlayWav(&sound_before, false, 1.0);
 				positionRafale = 0;
-				changement = true;
+				setChangement();
 				chargeur--;
 				Serial.println("shoot pendant refroidissement");
 			}
