@@ -1,4 +1,6 @@
 
+#ifndef ARME_H
+#define ARME_H
 #include "Game_Audio.h"
 #include <pgmspace.h>
 #include <Arduino.h>
@@ -1754,15 +1756,16 @@ public:
 	int chargeur;
 	int dureeRechargement = 3000;
 	Game_Audio_Class *GameAudio;
-	Arme(Game_Audio_Class *_GameAudio) : sound_before(rw_sound_before),
-										 sound_shoot(rw_sound_shoot),
-										 sound_after(rw_sound_after)
+	Arme(Game_Audio_Class *_GameAudio)
+		: sound_before(rw_sound_before),
+		  sound_shoot(rw_sound_shoot),
+		  sound_after(rw_sound_after)
 	{
 		GameAudio = _GameAudio;
 		chargeur = longueurChargeur;
 		millisBefore = 200;
 		millisShoot = 500;
-		millisShootRafale = 400;
+		millisShootRafale = 350;
 		millisAfter = 600;
 		dureeRechargement = 5000;
 		longueurRafale = 3;
@@ -1784,6 +1787,11 @@ public:
 	{
 		// Serial.printf("gachette : %d \n", _gachette);
 		changementModeAppuye = _selecteur;
+	}
+
+	int getNb10emeSecRestantReload()
+	{
+		return (dureeRechargement - (millis() - memoMillis)) / 100;
 	}
 
 	void MAJ()
@@ -1809,6 +1817,7 @@ public:
 					Serial.println("Mode : Coup par coup");
 					break;
 				}
+				changement = true;
 			}
 			if (gachette)
 			{
@@ -1819,6 +1828,7 @@ public:
 					etat = rechargeChargeur;
 					GameAudio->StopPlaying();
 					memoMillis = millis();
+					changement = true;
 				}
 				else if (chargeur > 0)
 				{
@@ -1882,12 +1892,12 @@ public:
 				{
 					// shoot fini
 					memoMillis = millis();
-					Serial.printf("positionRafale %d longueurRafale %d chargeur %d\n",positionRafale, longueurRafale,chargeur);
-					//positionRafale++;
+					Serial.printf("positionRafale %d longueurRafale %d chargeur %d\n", positionRafale, longueurRafale, chargeur);
+					// positionRafale++;
 					if (positionRafale < longueurRafale && chargeur > 0)
 					{
 						chargeur--;
-					//	memoMillis = millis();
+						//	memoMillis = millis();
 						positionRafale++;
 						GameAudio->StopPlaying();
 						GameAudio->PlayWav(&sound_shoot, false, 1.0);
@@ -1956,3 +1966,4 @@ public:
 		}
 	}
 };
+#endif

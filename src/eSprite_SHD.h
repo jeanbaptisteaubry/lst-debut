@@ -47,7 +47,8 @@ class eSprite_SHD : public TFT_eSprite{
         int _height;
         
     public :
-        eSprite_SHD(TFT_eSPI *ecran) : TFT_eSprite (ecran)
+        eSprite_SHD(TFT_eSPI *ecran) 
+        : TFT_eSprite (ecran)
         {
             setColorDepth(16);
 
