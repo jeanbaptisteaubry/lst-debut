@@ -4,6 +4,7 @@
 
 #include <TFT_eSPI.h>
 #include <SPI.h>
+#include <WiFi.h>
 #include "Image.h"
 #include "Game_Audio.h"
 #include "Arme.h"
@@ -19,6 +20,10 @@ enum EtatFini
   EnJeuPilote,
   MortPilote,
   ChoixModePilotage,
+  ChoixSSIDScan,
+  ChoixSSID,
+  ChoixMotDePasse,
+  ChoixValidationWifi,
   ChoixEquipe,
   ChoixArme,
   ChoixFin,
@@ -38,6 +43,9 @@ Ecran ecran;
 // TFT_eSprite spr = TFT_eSprite(&ecran); // Sprite object graph1
 
 int memoReste = -1;
+int nWifi = 0;
+int iWifi = 0;
+int memoIWifi = 0;
 unsigned long memoMillis;
 
 Arme laser(&GameAudio);
@@ -98,7 +106,7 @@ void loop()
   switch (etat)
   {
   case Initial:
-#pragma region
+#pragma region Initial
     // Position du Setup ou autre
     ecran.effacerEcran();
     ecran.afficherCentrerNormal("Initialisation\n");
@@ -124,7 +132,7 @@ void loop()
     break;
 #pragma endregion
   case EnJeuAutonome:
-
+#pragma region EnJeuAutonome
     laser.setGachette(btnGachette.actionne);
     laser.setChangementModeRelache(btnReload.relache);
     laser.setChangementModeAppuye(btnReload.actionne);
@@ -138,23 +146,25 @@ void loop()
 
     if (laser.changement || laser.etat == rechargeChargeur)
     {
-      //Un action sur l'arme, on bascule sur un affichage spécifique arme
-      ecran.afficherEcranJeuArme(laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
+      // Un action sur l'arme, on bascule sur un affichage spécifique arme
+      ecran.afficherEcranJeuArme(laser.chargeur, laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
     }
 
     if (!laser.changementAffichageFini)
       if (laser.millisChangement - millis() > ecran.dureeAvantVeille)
       {
-        //L'action sur l'arme est finie, on rebascule sur un affichage générique
+        // L'action sur l'arme est finie, on rebascule sur un affichage générique
         ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
         laser.changementAffichageFini = true;
       }
 
     break;
+#pragma endregion
   case MortAutonome:
 
     break;
   case AttenteWifi:
+#pragma region AttenteWifi
     if (changementEtat)
     {
       ecran.effacerEcran();
@@ -193,6 +203,7 @@ void loop()
       }
     }
     break;
+#pragma endregion
   case ConnecteAttenteOrdre:
     break;
   case ActionPilote:
@@ -246,12 +257,82 @@ void loop()
     // On a fait un appui simple sur bntMode5s
     if (!btnMode5s && btnMode.relache)
     {
-      if (param.mode == PiloteWifiDefaut || param.mode == PiloteWifiParame)
-        etat = ChoixFin;
-      else
+      switch (param.mode)
+      {
+      case Autonome:
         etat = ChoixEquipe;
+        break; //
+      case PiloteWifiDefaut:
+        etat = ChoixFin;
+        param.SSID = "LAZERJBA";
+        param.motDePAsse = "LAZERJBA";
+        break;
+      case PiloteWifiParame:
+        etat = ChoixSSIDScan;
+
+        break;
+      }
+    }
+    break;
+  case ChoixSSIDScan:
+  {
+    ecran.effacerEcran();
+    ecran.afficherCentrerGaucheL1("Sélection du wifi\n");
+    ecran.afficherCentrerAlerte("Scan en cours\n");
+
+    Serial.println("scan start");
+
+    // WiFi.scanNetworks will return the number of networks found
+    nWifi = WiFi.scanNetworks();
+    iWifi = -1;
+    memoIWifi = -2;
+    Serial.println("scan done");
+    if (nWifi == 0)
+    {
+      Serial.println("no networks found");
+    }
+    else
+    {
+      Serial.print(nWifi);
+      Serial.println(" networks found");
+    }
+    etat = ChoixSSID;
+  }
+  break;
+  case ChoixSSID:
+
+    if(btnGachette.relache && iWifi < nWifi)
+      iWifi ++;
+    if(btnMode.relache && iWifi > -2 && ! !btnMode5s)
+      iWifi --;
+
+    //Il y a un changement à afficher
+    if (iWifi != memoIWifi)
+    {
+      memoIWifi = iWifi;
+      ecran.effacerEcran();
+      ecran.afficherCentrerGaucheL1("Sélection du wifi\n");
+      switch (iWifi)
+      {
+      case -2:
+        ecran.afficherCentrerAlerte("Rescanner");
+        break;
+      case -1:
+        char strTmp[50];
+        sprintf(strTmp, "%d trouve(s) \n", nWifi);
+        ecran.afficherCentrerAlerte(strTmp);
+        break;
+      default:
+
+        char strTmp[100];
+        sprintf(strTmp, "%d: %d (%d) %c", iWifi + 1, WiFi.SSID(iWifi), WiFi.RSSI(iWifi), (WiFi.encryptionType(iWifi) == WIFI_AUTH_OPEN) ? " " : "*");
+        ecran.afficherCentrerAlerte(strTmp);
+        break;
+      }
     }
 
+    //On regarde s'il changer de mode 
+    
     break;
   case ChoixEquipe:
     // Changement de valeur si gachette

@@ -1,0 +1,8 @@
+Fait : Nouveaux écrans
+Fait : Son impact
+Fait : Son chargeur vide
+
+TODO : emetteur et capture infra rouge !
+TODO : Wifi
+Todo : Sélectionner le ssid
+Todo : Une fois ssid sélectionner, choisir clé WPA2

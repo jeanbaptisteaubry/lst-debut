@@ -169,8 +169,58 @@ public:
      * @param etat 
      * @param tempsRestantReload 
      */
-    void afficherEcranJeuArme(modeTire mode, etatArme etat, float tempsRestantReload){
-        
+    void afficherEcranJeuArme(int munition, modeTire mode, etatArme etat, float tempsRestantReload){
+        if (etat != rechargeChargeur)
+        {
+            effacerEcran();
+
+            switch (mode)
+            {
+            case simple:
+                spr_balleX1.pushSprite(0, 20);
+                Serial.println("Simple");
+                break;
+            case rafale:
+                spr_balleX3.pushSprite(0, 20);
+                Serial.println("Rafale");
+                break;
+            case automatique:
+                spr_balleXAuto.pushSprite(0, 20);
+                Serial.println("Automatique");
+                break;
+            }
+
+            char str[4];
+            if (munition <= 9)
+                sprintf(str, "0%d\n", munition);
+            else if (munition <= 99)
+                sprintf(str, "%d\n", munition);
+            else
+                sprintf(str, "++\n");
+            // Sprite spr = new Sprite
+            // ecran.pushImage
+
+            ecran.drawCentreString(str, 120, 20, 6);
+        }
+        else
+        {
+            if (tempsRestantReload != memoRestant)
+            {
+                effacerEcran();
+ 
+                memoRestant = tempsRestantReload;
+                spr_reload.pushSprite(0, 20);
+                char str[4];
+
+                // Sprite spr = new Sprite
+                // ecran.pushImage
+                ecran.setTextColor(TFT_RED);
+                ecran.drawCentreString(str, 120, 20, 6);
+                ecran.setTextColor(TFT_WHITE);
+                Serial.printf("Reload %d\n", tempsRestantReload);
+                setChange();
+            }
+        }
     }
 
     /**
@@ -180,6 +230,33 @@ public:
      * @param vie 
      */
     void afficherEcranJeuArmure(int armure, int vie){
+        effacerEcran();
+            spr_tdm.pushSprite(0, 20);
+            spr_shd.pushSprite(80, 20);
+
+            char str[4];
+            if (vie <= 9)
+                sprintf(str, "00%d\n", vie);
+            else if (vie <= 99)
+                sprintf(str, "0%d\n", vie);
+            else
+                sprintf(str, "100\n");
+            // Sprite spr = new Sprite
+            // ecran.pushImage
+
+            ecran.drawCentreString(str, 60, 20, 5);
+
+             if (armure <= 9)
+                sprintf(str, "00%d\n", armure);
+            else if (armure <= 99)
+                sprintf(str, "0%d\n", armure);
+            else
+                sprintf(str, "100\n");
+            // Sprite spr = new Sprite
+            // ecran.pushImage
+
+            ecran.drawCentreString(str, 160, 20, 5);
+            setChange();
 
     }
 
@@ -220,7 +297,7 @@ public:
                 break;
             }
 
-            char str[2];
+            char str[4];
             if (munition <= 9)
                 sprintf(str, "0%d\n", munition);
             else if (munition <= 99)
@@ -241,7 +318,7 @@ public:
                 spr_shd.pushSprite(0, 40);
                 memoRestant = tempsRestantReload;
                 spr_reload.pushSprite(80, 0);
-                char str[2];
+                char str[4];
 
                 // Sprite spr = new Sprite
                 // ecran.pushImage
