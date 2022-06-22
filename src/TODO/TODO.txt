@@ -1,7 +1,8 @@
 Fait : Nouveaux écrans
 Fait : Son impact
 Fait : Son chargeur vide
-
+A tester : classe de saisie par bouton
+En cours : sélection du mot de passe
 TODO : emetteur et capture infra rouge !
 TODO : Wifi
 Todo : Sélectionner le ssid

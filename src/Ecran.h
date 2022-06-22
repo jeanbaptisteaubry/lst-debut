@@ -141,6 +141,11 @@ public:
         ecran.fillScreen(TFT_BLACK);
         // setChange();
     }
+    /**
+     * @brief Affichage au centre
+     *
+     * @param str
+     */
     void afficherCentrerNormal(char *str)
     {
         ecran.setTextColor(TFT_WHITE);
@@ -148,6 +153,11 @@ public:
         setChange();
     }
 
+    /**
+     * @brief Affiche la chaine Titre à gauche en première ligne
+     *
+     * @param str
+     */
     void afficherCentrerGaucheL1(char *str)
     {
         ecran.setTextColor(TFT_WHITE);
@@ -155,6 +165,11 @@ public:
         setChange();
     }
 
+    /**
+     * @brief Affichage au centre d'un message d'alerte
+     *
+     * @param str
+     */
     void afficherCentrerAlerte(char *str)
     {
         ecran.setTextColor(TFT_RED);
@@ -163,13 +178,14 @@ public:
     }
 
     /**
-     * @brief une action de type Arme à mettre en avant 
-     * 
-     * @param mode 
-     * @param etat 
-     * @param tempsRestantReload 
+     * @brief une action de type Arme à mettre en avant
+     *
+     * @param mode
+     * @param etat
+     * @param tempsRestantReload
      */
-    void afficherEcranJeuArme(int munition, modeTire mode, etatArme etat, float tempsRestantReload){
+    void afficherEcranJeuArme(int munition, modeTire mode, etatArme etat, float tempsRestantReload)
+    {
         if (etat != rechargeChargeur)
         {
             effacerEcran();
@@ -207,7 +223,7 @@ public:
             if (tempsRestantReload != memoRestant)
             {
                 effacerEcran();
- 
+
                 memoRestant = tempsRestantReload;
                 spr_reload.pushSprite(0, 20);
                 char str[4];
@@ -225,52 +241,50 @@ public:
 
     /**
      * @brief Une action fait évoluer l'armure et/ou la vie du joueur mais pas l'arme
-     * 
-     * @param armure 
-     * @param vie 
+     *
+     * @param armure
+     * @param vie
      */
-    void afficherEcranJeuArmure(int armure, int vie){
+    void afficherEcranJeuArmure(int armure, int vie)
+    {
         effacerEcran();
-            spr_tdm.pushSprite(0, 20);
-            spr_shd.pushSprite(80, 20);
+        spr_tdm.pushSprite(0, 20);
+        spr_shd.pushSprite(80, 20);
 
-            char str[4];
-            if (vie <= 9)
-                sprintf(str, "00%d\n", vie);
-            else if (vie <= 99)
-                sprintf(str, "0%d\n", vie);
-            else
-                sprintf(str, "100\n");
-            // Sprite spr = new Sprite
-            // ecran.pushImage
+        char str[4];
+        if (vie <= 9)
+            sprintf(str, "00%d\n", vie);
+        else if (vie <= 99)
+            sprintf(str, "0%d\n", vie);
+        else
+            sprintf(str, "100\n");
+        // Sprite spr = new Sprite
+        // ecran.pushImage
 
-            ecran.drawCentreString(str, 60, 20, 5);
+        ecran.drawCentreString(str, 60, 20, 5);
 
-             if (armure <= 9)
-                sprintf(str, "00%d\n", armure);
-            else if (armure <= 99)
-                sprintf(str, "0%d\n", armure);
-            else
-                sprintf(str, "100\n");
-            // Sprite spr = new Sprite
-            // ecran.pushImage
+        if (armure <= 9)
+            sprintf(str, "00%d\n", armure);
+        else if (armure <= 99)
+            sprintf(str, "0%d\n", armure);
+        else
+            sprintf(str, "100\n");
+        // Sprite spr = new Sprite
+        // ecran.pushImage
 
-            ecran.drawCentreString(str, 160, 20, 5);
-            setChange();
-
+        ecran.drawCentreString(str, 160, 20, 5);
+        setChange();
     }
-
-
 
     /**
      * @brief Affiche l'écran  de jeu sans activité mise en avant
-     * 
-     * @param armure 
-     * @param vie 
-     * @param munition 
-     * @param mode 
-     * @param etat 
-     * @param tempsRestantReload 
+     *
+     * @param armure
+     * @param vie
+     * @param munition
+     * @param mode
+     * @param etat
+     * @param tempsRestantReload
      */
     void afficherEcranJeu(int armure, int vie, int munition, modeTire mode, etatArme etat, float tempsRestantReload)
     {
@@ -330,6 +344,23 @@ public:
             }
         }
         //  Serial.printf("IN GAME\n", btnMode.numberKeyPresses, btnMode.dureeAction);
- 
+    }
+
+    /**
+     * @brief Affichage de la zone Input pour la sélection du SSID
+     *
+     * @param inpTxt
+     */
+    void EcranAfficherChoixMdPSSID(InputText inpTxt)
+    {
+        effacerEcran();
+        afficherCentrerGaucheL1("Mot de passe");
+
+        //Affichage en rouge du caractère en cours :
+        ecran.setTextColor(TFT_RED);
+        ecran.drawCentreString(""+inpTxt.DonneCharAct(), 80, 40, 2);
+        ecran.drawRightString("" + inpTxt.DonneChaineAvantAct(), 60,40,2);
+        ecran.drawString("" + inpTxt.DonneChaineApres(), 60,40);
+        
     }
 };

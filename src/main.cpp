@@ -9,6 +9,8 @@
 #include "Game_Audio.h"
 #include "Arme.h"
 #include "Ecran.h"
+#include "InputText.h"
+
 enum EtatFini
 {
   Initial,
@@ -48,6 +50,8 @@ int iWifi = 0;
 int memoIWifi = 0;
 unsigned long memoMillis;
 
+InputText inpTxt("");
+
 Arme laser(&GameAudio);
 void setup()
 {
@@ -76,14 +80,27 @@ void loop()
   btnMode.MAJ();
   btnReload.MAJ();
   bool btnMode5s = false;
+  bool btnGachette5s = false;
+  bool btnReload5s = false;
+
   if (btnGachette.relache)
   {
     Serial.printf("Button gachette has been relache %u times %u ms\n", btnGachette.numberKeyPresses, btnGachette.dureeAction);
+    if (btnGachette.dureeAction >= 5000)
+    {
+      btnGachette5s = true;
+      Serial.print("BTN Gachette 5s\n");
+    }
   }
 
   if (btnReload.relache)
   {
     Serial.printf("Button relaod has been relache %u times %u ms\n", btnReload.numberKeyPresses, btnReload.dureeAction);
+    if (btnReload.dureeAction >= 5000)
+    {
+      btnReload5s = true;
+      Serial.print("BTN Reload 5s\n");
+    }
   }
 
   if (btnMode.relache)
@@ -300,40 +317,103 @@ void loop()
   }
   break;
   case ChoixSSID:
-
-    if(btnGachette.relache && iWifi < nWifi)
-      iWifi ++;
-    if(btnMode.relache && iWifi > -2 && ! !btnMode5s)
-      iWifi --;
-
-    //Il y a un changement à afficher
-    if (iWifi != memoIWifi)
+    if (!btnMode5s)
     {
-      memoIWifi = iWifi;
-      ecran.effacerEcran();
-      ecran.afficherCentrerGaucheL1("Sélection du wifi\n");
-      switch (iWifi)
-      {
-      case -2:
-        ecran.afficherCentrerAlerte("Rescanner");
-        break;
-      case -1:
-        char strTmp[50];
-        sprintf(strTmp, "%d trouve(s) \n", nWifi);
-        ecran.afficherCentrerAlerte(strTmp);
-        break;
-      default:
+      if (btnGachette.relache && iWifi < nWifi)
+        iWifi++;
+      if (btnReload.relache && iWifi > -2)
+        iWifi--;
 
-        char strTmp[100];
-        sprintf(strTmp, "%d: %d (%d) %c", iWifi + 1, WiFi.SSID(iWifi), WiFi.RSSI(iWifi), (WiFi.encryptionType(iWifi) == WIFI_AUTH_OPEN) ? " " : "*");
-        ecran.afficherCentrerAlerte(strTmp);
+      // Il y a un changement à afficher
+      if (iWifi != memoIWifi)
+      {
+        memoIWifi = iWifi;
+        ecran.effacerEcran();
+        ecran.afficherCentrerGaucheL1("Sélection du wifi\n");
+        switch (iWifi)
+        {
+        case -2:
+          ecran.afficherCentrerAlerte("Rescanner");
+          break;
+        case -1:
+        {
+          char strTmp[50];
+          sprintf(strTmp, "%d trouve(s) \n", nWifi);
+          ecran.afficherCentrerAlerte(strTmp);
+        }
         break;
+        default:
+        {
+          char strTmp[100];
+          sprintf(strTmp, "%d: %d (%d) %c", iWifi + 1, WiFi.SSID(iWifi), WiFi.RSSI(iWifi), (WiFi.encryptionType(iWifi) == WIFI_AUTH_OPEN) ? " " : "*");
+          ecran.afficherCentrerAlerte(strTmp);
+        }
+        break;
+        }
       }
     }
 
-    //On regarde s'il changer de mode 
-    
+    else
+    {
+      if (iWifi >= 0)
+      {
+        etat = ChoixMotDePasse;
+        inpTxt.setTexteBase(param.motDePAsse);
+      }
+      else
+        etat = ChoixEquipe;
+    }
+
+    // On regarde s'il changer de mode
+
     break;
+  case ChoixMotDePasse:
+  {
+    // Action      / Gachette / Reload      / mode 
+    // Fini        / Press    / Press
+    // Lettre UP   /          / Relache
+    // Letttre D   / Relache  /
+    // Lettre Next / Relache5S/  
+    // Lettre Back /          / Relache5S
+    // Valider MDP /          /           / Relache 5S
+    if(btnMode5s)
+    {
+      param.motDePAsse = String(inpTxt.donneTexte());
+      etat = ChoixEquipe;
+    }
+    else
+    {
+      bool actSelection = false;
+      if(btnGachette.relache)
+      {
+        inpTxt.CaracterePossibleSuivant();
+        actSelection = true;
+      }
+      if(btnReload.relache)
+      {
+        inpTxt.CaracterePossiblePrecedent();
+        actSelection = true;
+      }
+      if(btnGachette5s)
+      {
+        inpTxt.CaractereSelectionSuivant();
+        actSelection = true;
+      }
+      if(btnReload5s)
+      {
+        inpTxt.CaractereSelectionPrecedent();
+        actSelection = true;
+      }
+
+      //Il faut afficher !
+      if(actSelection)
+      {
+        ecran.effacerEcran();
+      }
+    }
+
+  }
+  break;
   case ChoixEquipe:
     // Changement de valeur si gachette
     if (btnGachette.relache)

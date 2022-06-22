@@ -5,6 +5,9 @@
         "streambuf": "cpp",
         "fs.h": "c",
         "pgmspace.h": "c",
-        "random": "cpp"
+        "random": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "sstream": "cpp"
     }
 }
