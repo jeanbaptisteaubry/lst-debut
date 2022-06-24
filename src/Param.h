@@ -15,8 +15,8 @@ class Param
 
 public:
     ModeFonctionnement mode;
-    String SSID;
-    String motDePAsse;
+    String Wifi_SSID;
+    String Wifi_motDePAsse;
     int team;
     String nomJoueur;
 
@@ -54,11 +54,11 @@ public:
             break;
             case 1:
 
-                SSID = buffer;
-                Serial.printf("  SSID %s\n",SSID);
+                Wifi_SSID = buffer;
+                Serial.printf("  Wifi_SSID %s\n",Wifi_SSID);
                 break;
             case 2:
-                motDePAsse = buffer;
+                Wifi_motDePAsse = buffer;
                 break;
             case 3:
              {
@@ -82,8 +82,8 @@ public:
     void LoadDefault()
     {
         mode = Autonome;
-        SSID = "LazerGame";
-        motDePAsse = "0123456789";
+        Wifi_SSID = "LazerGame";
+        Wifi_motDePAsse = "0123456789";
         team = 1;
         nomJoueur = "Gamer";
     }
@@ -99,8 +99,8 @@ public:
             return;
         }
         fileSvg.printf("%s\n", String(mode));
-        fileSvg.printf("%s\n", SSID);
-        fileSvg.printf("%s\n", motDePAsse);
+        fileSvg.printf("%s\n", Wifi_SSID);
+        fileSvg.printf("%s\n", Wifi_motDePAsse);
         fileSvg.printf("%d\n", team);
         fileSvg.printf("%s\n", nomJoueur);
         Serial.println("Param : Sauvegarde");
@@ -111,8 +111,8 @@ public:
     {
         Serial.printf("Configuration\n");
         Serial.printf("  mode %s\n",String(mode));
-        Serial.printf("  SSID %s\n",SSID);
-        Serial.printf("  motDePAsse %s\n",motDePAsse);
+        Serial.printf("  Wifi_SSID %s\n",Wifi_SSID);
+        Serial.printf("  Wifi_motDePAsse %s\n",Wifi_motDePAsse);
         Serial.printf("  team %d\n",team);
         Serial.printf("  nomJoueur %s\n",nomJoueur);
     }

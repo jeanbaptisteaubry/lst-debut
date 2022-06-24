@@ -359,8 +359,7 @@ public:
         //Affichage en rouge du caractère en cours :
         ecran.setTextColor(TFT_RED);
         ecran.drawCentreString(""+inpTxt.DonneCharAct(), 80, 40, 2);
-        ecran.drawRightString("" + inpTxt.DonneChaineAvantAct(), 60,40,2);
-        ecran.drawString("" + inpTxt.DonneChaineApres(), 60,40);
-        
+        ecran.drawRightString("" + inpTxt.DonneChaineAvantAct(), 75,40,2);
+        ecran.drawString("" + inpTxt.DonneChaineApres(), 90,40,2);
     }
 };

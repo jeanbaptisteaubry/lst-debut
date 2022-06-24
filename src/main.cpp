@@ -281,8 +281,8 @@ void loop()
         break; //
       case PiloteWifiDefaut:
         etat = ChoixFin;
-        param.SSID = "LAZERJBA";
-        param.motDePAsse = "LAZERJBA";
+        param.Wifi_SSID = "LAZERJBA";
+        param.Wifi_motDePAsse = "LAZERJBA";
         break;
       case PiloteWifiParame:
         etat = ChoixSSIDScan;
@@ -355,13 +355,23 @@ void loop()
 
     else
     {
-      if (iWifi >= 0)
+      switch (iWifi)
       {
-        etat = ChoixMotDePasse;
-        inpTxt.setTexteBase(param.motDePAsse);
+      case -2:
+        etat = ChoixSSIDScan;
+        break;
+      case -1:
+      {
       }
-      else
-        etat = ChoixEquipe;
+      break;
+      default:
+        {
+          param.Wifi_SSID = WiFi.SSID(iWifi);
+
+          etat = ChoixMotDePasse;
+          inpTxt.setTexteBase(param.Wifi_motDePAsse);
+        }
+      }
     }
 
     // On regarde s'il changer de mode
@@ -369,51 +379,69 @@ void loop()
     break;
   case ChoixMotDePasse:
   {
-    // Action      / Gachette / Reload      / mode 
+    // Action      / Gachette / Reload      / mode
     // Fini        / Press    / Press
     // Lettre UP   /          / Relache
     // Letttre D   / Relache  /
-    // Lettre Next / Relache5S/  
+    // Lettre Next / Relache5S/
     // Lettre Back /          / Relache5S
     // Valider MDP /          /           / Relache 5S
-    if(btnMode5s)
+    if (btnMode5s)
     {
-      param.motDePAsse = String(inpTxt.donneTexte());
-      etat = ChoixEquipe;
+      param.Wifi_motDePAsse = String(inpTxt.donneTexte());
+      etat = ChoixValidationWifi;
     }
     else
     {
       bool actSelection = false;
-      if(btnGachette.relache)
+      if (btnGachette.relache)
       {
         inpTxt.CaracterePossibleSuivant();
         actSelection = true;
       }
-      if(btnReload.relache)
+      if (btnReload.relache)
       {
         inpTxt.CaracterePossiblePrecedent();
         actSelection = true;
       }
-      if(btnGachette5s)
+      if (btnGachette5s)
       {
         inpTxt.CaractereSelectionSuivant();
         actSelection = true;
       }
-      if(btnReload5s)
+      if (btnReload5s)
       {
         inpTxt.CaractereSelectionPrecedent();
         actSelection = true;
       }
 
-      //Il faut afficher !
-      if(actSelection)
+      // Il faut afficher !
+      if (actSelection)
       {
         ecran.effacerEcran();
       }
     }
-
   }
   break;
+  case ChoixValidationWifi:
+  {
+    WiFi.mode(WIFI_STA); // Optional
+    WiFi.begin(param.Wifi_SSID, param.Wifi_motDePAsse);
+    Serial.println("\nConnecting");
+
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      Serial.print(".");
+      delay(100);
+    }
+
+    Serial.println("\nConnected to the WiFi network");
+    Serial.print("Local ESP32 IP: ");
+    Serial.println(WiFi.localIP());
+  }
+
+  break;
+
   case ChoixEquipe:
     // Changement de valeur si gachette
     if (btnGachette.relache)
