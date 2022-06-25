@@ -301,6 +301,7 @@ void loop()
 
     // WiFi.scanNetworks will return the number of networks found
     nWifi = WiFi.scanNetworks();
+    
     iWifi = -1;
     memoIWifi = -2;
     Serial.println("scan done");
@@ -426,18 +427,35 @@ void loop()
   case ChoixValidationWifi:
   {
     WiFi.mode(WIFI_STA); // Optional
-    WiFi.begin(param.Wifi_SSID, param.Wifi_motDePAsse);
+    char *wifi_ssid;
+     param.Wifi_SSID.toCharArray(wifi_ssid,param.Wifi_SSID.length(),0);
+
+     char *wifi_pwd;
+     param.Wifi_SSID.toCharArray(wifi_pwd,param.Wifi_motDePAsse.length(),0);
+    //WiFi.begin(param.Wifi_SSID, param.Wifi_motDePAsse);
     Serial.println("\nConnecting");
 
-    while (WiFi.status() != WL_CONNECTED)
+    int countWaiting = 0;
+    int waitingMax = 50 ;
+    while (WiFi.status() != WL_CONNECTED && countWaiting < waitingMax)
     {
       Serial.print(".");
       delay(100);
+      countWaiting ++ ;
     }
 
-    Serial.println("\nConnected to the WiFi network");
-    Serial.print("Local ESP32 IP: ");
-    Serial.println(WiFi.localIP());
+    if(WiFi.status() == WL_CONNECTED)
+    {
+      Serial.println("\nConnected to the WiFi network");
+      Serial.print("Local ESP32 IP: ");
+      Serial.println(WiFi.localIP());
+      etat = ChoixFin;
+    }
+    else
+    {
+      Serial.print("Echec wifi ");
+      etat = ChoixSSIDScan;
+    }
   }
 
   break;

@@ -10,6 +10,7 @@
 #include "eSprite_balleXAuto.h"
 #include "eSprite_reload.h"
 #include "Arme.h"
+#include "InputText.h"
 
 #define _RGB16BIT565(r, g, b) ((b % 32) + ((g % 64) << 6) + ((r % 32) << 11))
 

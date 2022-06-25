@@ -1,9 +1,19 @@
 Fait : Nouveaux écrans
 Fait : Son impact
 Fait : Son chargeur vide
-A tester : classe de saisie par bouton
-En cours : sélection du mot de passe
+TODO : I. Wifi
+A tester : A. classe de saisie par bouton
+A tester : B : Sélectionner le ssid
+A tester : B. sélection du mot de passe
+A tester : C. Une fois ssid sélectionner, choisir clé WPA2
+
+TODO : II. Serveur
+A. Choix technologie (serveur Apache/PHP avec actualisation JS ?)
+B. Sélection IP Serveur. Nom DNS ?
+C. Paramétrage arme depuis serveur
+D. Paramétrage partie depuis serveur
+
 TODO : emetteur et capture infra rouge !
-TODO : Wifi
-Todo : Sélectionner le ssid
-Todo : Une fois ssid sélectionner, choisir clé WPA2
+
+
+
