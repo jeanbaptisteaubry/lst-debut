@@ -166,9 +166,8 @@ void loop()
       // Un action sur l'arme, on bascule sur un affichage spécifique arme
       ecran.afficherEcranJeuArme(laser.chargeur, laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
     }
-
-    if (!laser.changementAffichageFini)
-      if (laser.millisChangement - millis() > ecran.dureeAvantVeille)
+    else if (laser.changementAffichageFini)
+      if (laser.millisChangement - millis() > ecran.dureeAvantVeille /2)
       {
         // L'action sur l'arme est finie, on rebascule sur un affichage générique
         ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
@@ -301,7 +300,7 @@ void loop()
 
     // WiFi.scanNetworks will return the number of networks found
     nWifi = WiFi.scanNetworks();
-    
+
     iWifi = -1;
     memoIWifi = -2;
     Serial.println("scan done");
@@ -366,12 +365,12 @@ void loop()
       }
       break;
       default:
-        {
-          param.Wifi_SSID = WiFi.SSID(iWifi);
+      {
+        param.Wifi_SSID = WiFi.SSID(iWifi);
 
-          etat = ChoixMotDePasse;
-          inpTxt.setTexteBase(param.Wifi_motDePAsse);
-        }
+        etat = ChoixMotDePasse;
+        inpTxt.setTexteBase(param.Wifi_motDePAsse);
+      }
       }
     }
 
@@ -428,23 +427,23 @@ void loop()
   {
     WiFi.mode(WIFI_STA); // Optional
     char *wifi_ssid;
-     param.Wifi_SSID.toCharArray(wifi_ssid,param.Wifi_SSID.length(),0);
+    param.Wifi_SSID.toCharArray(wifi_ssid, param.Wifi_SSID.length(), 0);
 
-     char *wifi_pwd;
-     param.Wifi_SSID.toCharArray(wifi_pwd,param.Wifi_motDePAsse.length(),0);
-    //WiFi.begin(param.Wifi_SSID, param.Wifi_motDePAsse);
+    char *wifi_pwd;
+    param.Wifi_SSID.toCharArray(wifi_pwd, param.Wifi_motDePAsse.length(), 0);
+    // WiFi.begin(param.Wifi_SSID, param.Wifi_motDePAsse);
     Serial.println("\nConnecting");
 
     int countWaiting = 0;
-    int waitingMax = 50 ;
+    int waitingMax = 50;
     while (WiFi.status() != WL_CONNECTED && countWaiting < waitingMax)
     {
       Serial.print(".");
       delay(100);
-      countWaiting ++ ;
+      countWaiting++;
     }
 
-    if(WiFi.status() == WL_CONNECTED)
+    if (WiFi.status() == WL_CONNECTED)
     {
       Serial.println("\nConnected to the WiFi network");
       Serial.print("Local ESP32 IP: ");

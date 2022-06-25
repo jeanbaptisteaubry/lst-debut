@@ -43,6 +43,11 @@ public:
     {
     }
 
+
+    /**
+     * @brief Récommence le compteur pour l'écran de veille
+     * 
+     */
     void setChange()
     {
         lastChange = millis();
@@ -190,6 +195,7 @@ public:
         if (etat != rechargeChargeur)
         {
             effacerEcran();
+            setChange();
 
             switch (mode)
             {
@@ -224,6 +230,7 @@ public:
             if (tempsRestantReload != memoRestant)
             {
                 effacerEcran();
+                setChange();
 
                 memoRestant = tempsRestantReload;
                 spr_reload.pushSprite(0, 20);
