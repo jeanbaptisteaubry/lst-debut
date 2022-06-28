@@ -158,22 +158,26 @@ void loop()
     if (changementEtat) // On vient de changer l'état
     {
       // ecran.drawBitmap(40,40,testImg,4,7, (uint8_t)TFT_WHITE);
-      ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
+      ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat, laser.getTempsRestantEnSAAfficher());
     }
 
     if (laser.changement || laser.etat == rechargeChargeur)
     {
       // Un action sur l'arme, on bascule sur un affichage spécifique arme
-      ecran.afficherEcranJeuArme(laser.chargeur, laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
+      ecran.afficherEcranJeuArme(laser.chargeur, laser.mode, laser.etat,  laser.getTempsRestantEnSAAfficher());
     }
-    else if (laser.changementAffichageFini)
-      if (laser.millisChangement - millis() > ecran.dureeAvantVeille /2)
+
+    
+    else if (!laser.changementAffichageFini)
+    {
+      if ( millis() - laser.millisChangement > ecran.dureeAvantVeille /2)
       {
         // L'action sur l'arme est finie, on rebascule sur un affichage générique
-        ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat, ((float)laser.getNb10emeSecRestantReload()) / 10);
+        ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat,  laser.getTempsRestantEnSAAfficher());
         laser.changementAffichageFini = true;
       }
-
+      
+    }
     break;
 #pragma endregion
   case MortAutonome:

@@ -190,7 +190,7 @@ public:
      * @param etat
      * @param tempsRestantReload
      */
-    void afficherEcranJeuArme(int munition, modeTire mode, etatArme etat, float tempsRestantReload)
+    void afficherEcranJeuArme(int munition, modeTire mode, etatArme etat, int tempsRestantReload)
     {
         if (etat != rechargeChargeur)
         {
@@ -229,20 +229,21 @@ public:
         {
             if (tempsRestantReload != memoRestant)
             {
+                //Changement de temps
                 effacerEcran();
                 setChange();
 
                 memoRestant = tempsRestantReload;
                 spr_reload.pushSprite(0, 20);
                 char str[4];
-
+                sprintf(str, "%d\n", tempsRestantReload);
                 // Sprite spr = new Sprite
                 // ecran.pushImage
                 ecran.setTextColor(TFT_RED);
                 ecran.drawCentreString(str, 120, 20, 6);
                 ecran.setTextColor(TFT_WHITE);
                 Serial.printf("Reload %d\n", tempsRestantReload);
-                setChange();
+                
             }
         }
     }
@@ -300,6 +301,7 @@ public:
         if (etat != rechargeChargeur)
         {
             effacerEcran();
+            setChange();
             spr_tdm.pushSprite(0, 0);
             spr_shd.pushSprite(0, 40);
 

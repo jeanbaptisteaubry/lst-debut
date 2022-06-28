@@ -2497,9 +2497,10 @@ public:
 		changementModeAppuye = _selecteur;
 	}
 
-	int getNb10emeSecRestantReload()
+	// Donne le temps restant de rechargement à afficher
+	int getTempsRestantEnSAAfficher()
 	{
-		return (dureeRechargement - (millis() - memoMillis)) / 100;
+		return (dureeRechargement - (millis() - memoMillis)) / 1000;
 	}
 
 	void MAJ()
