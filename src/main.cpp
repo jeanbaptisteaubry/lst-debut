@@ -132,17 +132,24 @@ void loop()
     param.Print();
     delay(1000);
     // On charge le fichier
-    switch (param.mode)
+    if (false)
     {
-    case Autonome:
-      etat = EnJeuAutonome;
-      break; //
-    case PiloteWifiDefaut:
-      etat = AttenteWifi;
-      break;
-    case PiloteWifiParame:
-      etat = AttenteWifi;
-      break;
+      switch (param.mode)
+      {
+      case Autonome:
+        etat = EnJeuAutonome;
+        break; //
+      case PiloteWifiDefaut:
+        etat = AttenteWifi;
+        break;
+      case PiloteWifiParame:
+        etat = AttenteWifi;
+        break;
+      }
+    }
+    else
+    {
+      etat = ChoixSSIDScan;
     }
 
     // Chargement du fichier
@@ -164,19 +171,17 @@ void loop()
     if (laser.changement || laser.etat == rechargeChargeur)
     {
       // Un action sur l'arme, on bascule sur un affichage spécifique arme
-      ecran.afficherEcranJeuArme(laser.chargeur, laser.mode, laser.etat,  laser.getTempsRestantEnSAAfficher());
+      ecran.afficherEcranJeuArme(laser.chargeur, laser.mode, laser.etat, laser.getTempsRestantEnSAAfficher());
     }
 
-    
     else if (!laser.changementAffichageFini)
     {
-      if ( millis() - laser.millisChangement > ecran.dureeAvantVeille /2)
+      if (millis() - laser.millisChangement > ecran.dureeAvantVeille / 2)
       {
         // L'action sur l'arme est finie, on rebascule sur un affichage générique
-        ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat,  laser.getTempsRestantEnSAAfficher());
+        ecran.afficherEcranJeu(0, 0, laser.chargeur, laser.mode, laser.etat, laser.getTempsRestantEnSAAfficher());
         laser.changementAffichageFini = true;
       }
-      
     }
     break;
 #pragma endregion
@@ -253,7 +258,7 @@ void loop()
     if (changementEtat || btnGachette.relache)
     {
       ecran.effacerEcran();
-      ecran.afficherCentrerGaucheL1("Mode de fonctionnement");
+      ecran.afficherGaucheL1("Mode de fonctionnement");
 
       switch (param.mode)
       {
@@ -297,7 +302,7 @@ void loop()
   case ChoixSSIDScan:
   {
     ecran.effacerEcran();
-    ecran.afficherCentrerGaucheL1("Sélection du wifi\n");
+    ecran.afficherGaucheL1("Sélection du wifi\n");
     ecran.afficherCentrerAlerte("Scan en cours\n");
 
     Serial.println("scan start");
@@ -321,9 +326,9 @@ void loop()
   }
   break;
   case ChoixSSID:
-    if (!btnMode5s)
+    if (!btnMode.relache)
     {
-      if (btnGachette.relache && iWifi < nWifi)
+      if (btnGachette.relache && iWifi < nWifi - 1)
         iWifi++;
       if (btnReload.relache && iWifi > -2)
         iWifi--;
@@ -333,11 +338,12 @@ void loop()
       {
         memoIWifi = iWifi;
         ecran.effacerEcran();
-        ecran.afficherCentrerGaucheL1("Sélection du wifi\n");
+        ecran.afficherGaucheL1("Sélection du wifi\n");
         switch (iWifi)
         {
         case -2:
           ecran.afficherCentrerAlerte("Rescanner");
+          Serial.println("Rescanner");
           break;
         case -1:
         {
@@ -349,8 +355,9 @@ void loop()
         default:
         {
           char strTmp[100];
-          sprintf(strTmp, "%d: %d (%d) %c", iWifi + 1, WiFi.SSID(iWifi), WiFi.RSSI(iWifi), (WiFi.encryptionType(iWifi) == WIFI_AUTH_OPEN) ? " " : "*");
+          sprintf(strTmp, "%d: %s %c", iWifi + 1, WiFi.SSID(iWifi), (WiFi.encryptionType(iWifi) == WIFI_AUTH_OPEN) ? " " : "*");
           ecran.afficherCentrerAlerte(strTmp);
+          Serial.printf("%s \n", strTmp);
         }
         break;
         }
@@ -373,6 +380,7 @@ void loop()
         param.Wifi_SSID = WiFi.SSID(iWifi);
 
         etat = ChoixMotDePasse;
+        Serial.printf("param.Wifi_motDePAsse %s \n", param.Wifi_motDePAsse);
         inpTxt.setTexteBase(param.Wifi_motDePAsse);
       }
       }
@@ -393,6 +401,7 @@ void loop()
     if (btnMode5s)
     {
       param.Wifi_motDePAsse = String(inpTxt.donneTexte());
+      Serial.printf("inpTxt.donneTexte %s \n", inpTxt.donneTexte());
       etat = ChoixValidationWifi;
     }
     else
@@ -408,7 +417,7 @@ void loop()
         inpTxt.CaracterePossiblePrecedent();
         actSelection = true;
       }
-      if (btnGachette5s)
+      if (btnGachette5s || btnMode.relache)
       {
         inpTxt.CaractereSelectionSuivant();
         actSelection = true;
@@ -422,7 +431,7 @@ void loop()
       // Il faut afficher !
       if (actSelection)
       {
-        ecran.effacerEcran();
+        ecran.EcranAfficherChoixMdPSSID(inpTxt);
       }
     }
   }
@@ -475,7 +484,7 @@ void loop()
     if (changementEtat || btnGachette.relache)
     {
       ecran.effacerEcran();
-      ecran.afficherCentrerGaucheL1("Choix de l'equipe\n");
+      ecran.afficherGaucheL1("Choix de l'equipe\n");
       if (param.team == 0)
       {
         Serial.printf("Equipe : solo\n");
@@ -499,7 +508,7 @@ void loop()
     if (changementEtat)
     {
       ecran.effacerEcran();
-      ecran.afficherCentrerGaucheL1("Sélection de l'arme");
+      ecran.afficherGaucheL1("Sélection de l'arme");
 
       ecran.afficherCentrerAlerte("Arme : not yet!");
       Serial.printf("Arme : not yet!\n");

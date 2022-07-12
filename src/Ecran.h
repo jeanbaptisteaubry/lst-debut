@@ -164,10 +164,10 @@ public:
      *
      * @param str
      */
-    void afficherCentrerGaucheL1(char *str)
+    void afficherGaucheL1(char *str)
     {
         ecran.setTextColor(TFT_WHITE);
-        ecran.drawCentreString(str, 0, 10, 2);
+        ecran.drawString(str, 0, 10, 2);
         setChange();
     }
 
@@ -364,12 +364,14 @@ public:
     void EcranAfficherChoixMdPSSID(InputText inpTxt)
     {
         effacerEcran();
-        afficherCentrerGaucheL1("Mot de passe");
+        setChange();
+        afficherGaucheL1("Mot de passe");
 
         //Affichage en rouge du caractère en cours :
         ecran.setTextColor(TFT_RED);
-        ecran.drawCentreString(""+inpTxt.DonneCharAct(), 80, 40, 2);
+        ecran.drawCentreString(""+inpTxt.DonneCharAct(), 80, 40, 2); 
         ecran.drawRightString("" + inpTxt.DonneChaineAvantAct(), 75,40,2);
-        ecran.drawString("" + inpTxt.DonneChaineApres(), 90,40,2);
+        ecran.drawString("" + inpTxt.DonneChaineApres(), 90,40,2); 
+         Serial.printf("%s %c %c \n",inpTxt.DonneChaineAvantAct(),inpTxt.DonneCharAct(),inpTxt.DonneChaineApres());
     }
 };

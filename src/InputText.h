@@ -6,10 +6,9 @@
 
 using std::string;
 
-
 /**
  * @brief Classe permettant de gérer la construction d'une chaine de saisie avec un curseur qui se déplace
- * 
+ *
  */
 class InputText
 {
@@ -36,23 +35,34 @@ public:
 
         positionAct = 0;
         length = chaine.length();
+        Serial.printf("texteBase : %s \n", texteBase);
     }
 
     String donneTexte()
     {
         return chaine;
     }
-    void setTexteBase(String texteBase) 
+    void setTexteBase(String texteBase)
     {
+        if (texteBase.compareTo("") == 0)
+        {
+            chaine = String("A");
+            positionPossible = 0;
+        }
+        else
+        {
 
-        chaine = String(texteBase);
+            chaine = String(texteBase);
+        }
         positionAct = 0;
+        positionPossible = DonnePositionPossible(chaine[0]);
+
         length = chaine.length();
     }
 
     void CaracterePossibleSuivant()
     {
-        if (positionPossible < possible.length())
+        if (positionPossible < possible.length() - 1)
             positionPossible++;
         else
             positionPossible = 0;
@@ -81,32 +91,34 @@ public:
 
     void CaractereSelectionSuivant()
     {
-        if (positionAct < chaine.length())
+
+        if (positionAct < chaine.length() - 1)
         {
             positionAct++;
             positionPossible = DonnePositionPossible(chaine[positionAct]);
         }
-        if (positionAct == chaine.length())
+        if (positionAct == chaine.length()-1)
         {
             chaine += possible[positionPossible];
+            positionAct++;
         }
     }
 
-    String DonneChaineAvantAct(  )
+    String DonneChaineAvantAct()
     {
-        return chaine.substring (0, positionAct);
+        return chaine.substring(0, positionAct);
     }
 
     char DonneCharAct()
     {
-        return chaine[positionAct]; 
+        return chaine[positionAct];
     }
 
     String DonneChaineApres()
     {
-        if(chaine.length() - positionAct == 1)
+        if (chaine.length() - positionAct == 1)
             return "";
-        return chaine.substring(positionAct+1, chaine.length() - 1 - positionAct);
+        return chaine.substring(positionAct + 1, chaine.length() - 1 - positionAct);
     }
 };
 
