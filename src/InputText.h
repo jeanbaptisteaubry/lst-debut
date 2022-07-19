@@ -121,7 +121,7 @@ public:
     {
         if (chaine.length() - positionAct <= 1)
             return "";
-        return chaine.substring(positionAct + 1, chaine.length() - 1);
+        return chaine.substring(positionAct + 1, chaine.length() );
     }
 };
 

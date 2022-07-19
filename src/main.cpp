@@ -79,6 +79,9 @@ void loop()
   btnGachette.MAJ();
   btnMode.MAJ();
   btnReload.MAJ();
+  bool btnMode1s = false;
+  bool btnGachette1s = false;
+  bool btnReload1s = false;
   bool btnMode5s = false;
   bool btnGachette5s = false;
   bool btnReload5s = false;
@@ -89,7 +92,14 @@ void loop()
     if (btnGachette.dureeAction >= 5000)
     {
       btnGachette5s = true;
+      btnGachette1s = true;
       Serial.print("BTN Gachette 5s\n");
+    }
+    else
+    if (btnGachette.dureeAction >= 1000)
+    {
+      btnGachette1s = true;
+      Serial.print("BTN Gachette 1s\n");
     }
   }
 
@@ -99,7 +109,14 @@ void loop()
     if (btnReload.dureeAction >= 5000)
     {
       btnReload5s = true;
+      btnReload1s = true;
       Serial.print("BTN Reload 5s\n");
+    }
+    else
+     if (btnReload.dureeAction >= 1000)
+    {
+      btnReload1s = true;
+      Serial.print("BTN Reload 1s\n");
     }
   }
 
@@ -110,8 +127,15 @@ void loop()
     {
       changementEtat = true;
       btnMode5s = true;
+      btnMode1s = true; 
       etat = ChoixModePilotage;
       Serial.print("BTN MODE 5s\n");
+    }
+    else
+    if (btnMode.dureeAction >= 1000)
+    { 
+      btnMode1s = true; 
+      Serial.print("BTN MODE 1s\n");
     }
     else
     {
@@ -419,12 +443,12 @@ void loop()
         inpTxt.CaracterePossiblePrecedent();
         actSelection = true;
       }
-      if (btnGachette5s || btnMode.relache)
+      if (btnGachette1s || btnMode.relache)
       {
         inpTxt.CaractereSelectionSuivant();
         actSelection = true;
       }
-      if (btnReload5s)
+      if (btnReload1s)
       {
         inpTxt.CaractereSelectionPrecedent();
         actSelection = true;

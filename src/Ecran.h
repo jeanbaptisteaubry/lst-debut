@@ -369,10 +369,12 @@ public:
 
         //Affichage en rouge du caractère en cours :
         ecran.setTextColor(TFT_RED);
-        ecran.drawCentreString(""+inpTxt.DonneCharAct(), 80, 40, 2); 
-        
-        ecran.drawRightString(String(inpTxt.DonneChaineAvantAct().c_str()), 75,40,2);
-        ecran.drawString(String(inpTxt.DonneChaineApres().c_str()), 90,40,2); 
+        char strTmp[5];
+        sprintf(strTmp,"%c\n" ,inpTxt.DonneCharAct());
+        ecran.drawCentreString(strTmp, 80, 40, 2); 
+        ecran.setTextColor(TFT_WHITE);
+        ecran.drawRightString(String(inpTxt.DonneChaineAvantAct().c_str()), 70,40,2);
+        ecran.drawString(String(inpTxt.DonneChaineApres().c_str()), 85,40,2); 
         Serial.printf("EcranAfficherChoixMdPSSID : %s %c %s \n %s\n",inpTxt.DonneChaineAvantAct().c_str(),inpTxt.DonneCharAct(),inpTxt.DonneChaineApres().c_str(),inpTxt.donneTexte().c_str());
     }
 };
