@@ -381,7 +381,9 @@ void loop()
 
         etat = ChoixMotDePasse;
         Serial.printf("param.Wifi_motDePAsse %s \n", param.Wifi_motDePAsse);
+
         inpTxt.setTexteBase(param.Wifi_motDePAsse);
+        Serial.printf("inpTxt.setTexteBase %s \n", inpTxt.donneTexte());
       }
       }
     }
@@ -400,7 +402,7 @@ void loop()
     // Valider MDP /          /           / Relache 5S
     if (btnMode5s)
     {
-      param.Wifi_motDePAsse = String(inpTxt.donneTexte());
+      param.Wifi_motDePAsse = String(inpTxt.donneTexte().c_str());
       Serial.printf("inpTxt.donneTexte %s \n", inpTxt.donneTexte());
       etat = ChoixValidationWifi;
     }
@@ -432,6 +434,10 @@ void loop()
       if (actSelection)
       {
         ecran.EcranAfficherChoixMdPSSID(inpTxt);
+        //inpTxt.setTexteBase("putainte debarteojkaergbaergaergaergaerg aervaervaerb");
+        char strTmp[500] ;
+        sprintf(strTmp,"inpTxt.donneTexte %s %d\n", inpTxt.donneTexte().c_str(), inpTxt.donneTexte().length()); //Serial.print(strTmp);
+        Serial.println(strTmp);
       }
     }
   }

@@ -90,7 +90,7 @@ public:
         if (veilleEnCours && millis() - lastDrawVeille >= dureeDrawVeille)
         {
             lastDrawVeille = millis();
-            Serial.printf("Position %d\n", positionScanVeille);
+            //Serial.printf("Position %d\n", positionScanVeille);
             switch (positionScanVeille)
             {
 
@@ -370,8 +370,9 @@ public:
         //Affichage en rouge du caractère en cours :
         ecran.setTextColor(TFT_RED);
         ecran.drawCentreString(""+inpTxt.DonneCharAct(), 80, 40, 2); 
-        ecran.drawRightString("" + inpTxt.DonneChaineAvantAct(), 75,40,2);
-        ecran.drawString("" + inpTxt.DonneChaineApres(), 90,40,2); 
-         Serial.printf("%s %c %c \n",inpTxt.DonneChaineAvantAct(),inpTxt.DonneCharAct(),inpTxt.DonneChaineApres());
+        
+        ecran.drawRightString(String(inpTxt.DonneChaineAvantAct().c_str()), 75,40,2);
+        ecran.drawString(String(inpTxt.DonneChaineApres().c_str()), 90,40,2); 
+        Serial.printf("EcranAfficherChoixMdPSSID : %s %c %s \n %s\n",inpTxt.DonneChaineAvantAct().c_str(),inpTxt.DonneCharAct(),inpTxt.DonneChaineApres().c_str(),inpTxt.donneTexte().c_str());
     }
 };

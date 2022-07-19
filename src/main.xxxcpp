@@ -1,0 +1,258 @@
+/*****************************************************
+  On dessine sur un écran TFT KMR-1.8 SPI
+  Version pour ESP8266 / ESP32
+  
+  Plus d'infos:
+  https://electroniqueamateur.blogspot.com/2019/08/ecran-couleur-spi-st7735-et-esp32.html
+  Les couleurs prédéfinies par la bibliothèque sont:
+  TFT_BLACK      TFT_NAVY         TFT_DARKGREEN     TFT_DARKCYAN
+  TFT_MAROON     TFT_PURPLE       TFT_OLIVE         TFT_LIGHTGREY
+  TFT_DARKGREY   TFT_BLUE         TFT_GREEN         TFT_CYAN
+  TFT_RED        TFT_MAGENTA      TFT_YELLOW        TFT_WHITE
+  TFT_ORANGE     TFT_GREENYELLOW  TFT_PINK
+*****************************************************/
+#include <Arduino.h>
+#include "Button.h"
+#include "Param.h"
+
+#include <TFT_eSPI.h>
+#include <SPI.h>
+#include <WiFi.h>
+#include "Image.h"
+#include "Game_Audio.h"
+#include "Arme.h"
+#include "Ecran.h"
+#include "InputText.h"
+TFT_eSPI ecran = TFT_eSPI();
+
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("0");
+  ecran.init();
+  ecran.setRotation(1); // réglage de l'écran en mode paysage (0 pour mode portrait)
+  randomSeed(analogRead(A0)); // pour la génération de nombres aléatoires
+Serial.println("0 fin");
+  String test1 = "0";
+ 
+  String test2 = "01";
+ 
+  String test3 = "012";
+ 
+  String test4 = "0123";
+ 
+  String test5 = "01234";
+ 
+  String test6 = "012345";
+  String test7 = "0123456";
+  String test8 = "01234567";
+  String test9 = "012345678";
+  String test10 = "0123456789";
+  String test11 = "01234567890";
+  String test12 = "012345678901";
+  String test13 = "0012345678912";
+  String test14 = "00123456789123";
+  String test15 = "001234567891234";
+  String test16 = "0012345678912345";
+  String test17 = "00123456789123456";
+  String test18 = "001234567891234567";
+  String test19 = "0012345678912345678";
+  String test20 = "00123456789123456789";
+  String test21 = "0012345678901234567891";
+  String test22 = "00123456789012345678912";
+  String test23 = "001234567890123456789123";
+  String test24 = "0012345678901234567891234";
+  String test25 = "00123456789012345678912345";
+  String test26 = "001234567890123456789123456";
+  String test27 = "0012345678901234567891234567";
+  String test28 = "00123456789012345678912345678";
+  String test29 = "0012345678901234567890123456789"; 
+  
+  Serial.printf("test1 %s \n",test1);
+Serial.printf("test2 %s \n",test2);
+Serial.printf("test3 %s \n",test3);
+Serial.printf("test4 %s \n",test4);
+Serial.printf("test5 %s \n",test5);
+Serial.printf("test6 %s \n",test6);
+Serial.printf("test7 %s \n",test7);
+Serial.printf("test8 %s \n",test8);
+Serial.printf("test9 %s \n",test9);
+Serial.printf("test10 %s \n",test10);
+Serial.printf("test11 %s \n",test11);
+Serial.printf("test12 %s \n",test12);
+Serial.printf("test13 %s \n",test13);
+Serial.printf("test14 %s \n",test14);
+Serial.printf("test15 %s \n",test15);
+Serial.printf("test16 %s \n",test16);
+Serial.printf("test17 %s \n",test17);
+Serial.printf("test18 %s \n",test18);
+Serial.printf("test19 %s \n",test19);
+Serial.printf("test20 %s \n",test20);
+Serial.printf("test21 %s \n",test21);
+Serial.printf("test22 %s \n",test22);
+Serial.printf("test23 %s \n",test23);
+Serial.printf("test24 %s \n",test24);
+Serial.printf("test25 %s \n",test25);
+Serial.printf("test26 %s \n",test26);
+Serial.printf("test27 %s \n",test27);
+Serial.printf("test28 %s \n",test28);
+Serial.printf("test29 %s \n",test29); 
+
+Serial.print(test1);
+Serial.print(test2);
+Serial.print(test3);
+Serial.print(test4);
+Serial.print(test5);
+Serial.print(test6);
+Serial.print(test7);
+Serial.print(test8);
+Serial.print(test9);
+Serial.print(test10);
+Serial.print(test11);
+Serial.print(test12);
+Serial.print(test13);
+Serial.print(test14);
+Serial.print(test15);
+Serial.print(test16);
+Serial.print(test17);
+Serial.print(test18);
+Serial.print(test19);
+Serial.print(test20);
+Serial.print(test21);
+Serial.print(test22);
+Serial.print(test23);
+Serial.print(test24);
+Serial.print(test25);
+Serial.print(test26);
+Serial.print(test27);
+Serial.print(test28);
+Serial.print(test29);
+
+char strTmp[500] ;
+sprintf(strTmp,"test1 %s \n", test1.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test2 %s \n", test2.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test3 %s \n", test3.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test4 %s \n", test4.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test5 %s \n", test5.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test6 %s \n", test6.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test7 %s \n", test7.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test8 %s \n", test8.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test9 %s \n", test9.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test10 %s \n", test10.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test11 %s \n", test11.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test12 %s \n", test12.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test13 %s \n", test13.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test14 %s \n", test14.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test15 %s \n", test15.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test16 %s \n", test16.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test17 %s \n", test17.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test18 %s \n", test18.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test19 %s \n", test19.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test20 %s \n", test20.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test21 %s \n", test21.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test22 %s \n", test22.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test23 %s \n", test23.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test24 %s \n", test24.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test25 %s \n", test25.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test26 %s \n", test26.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test27 %s \n", test27.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test28 %s \n", test28.c_str()); Serial.print(strTmp);
+sprintf(strTmp,"test29 %s \n", test29.c_str()); Serial.print(strTmp);
+
+
+
+
+}
+
+void loop() {
+
+  // compte à rebours
+
+  // fond vert
+  Serial.println("1");
+  ecran.fillScreen(TFT_GREEN); 
+ Serial.println("2");
+  // texte pourpre sur fond vert
+  // puisqu'on a spécifié une couleur de fond, le texte
+  // masquera ce qui était écrit prédécemment
+  ecran.setTextColor(TFT_PURPLE, TFT_GREEN);
+Serial.println("3");
+  // on écrit "5", à la position x = 80, y = 35, avec la police #7
+  ecran.drawCentreString("5", 80, 35, 7); 
+  delay(500);
+  ecran.drawCentreString("4", 80, 35, 7); 
+  delay(500);
+  ecran.drawCentreString("3", 80, 35, 7); 
+  delay(500);
+  ecran.drawCentreString("2", 80, 35, 7); 
+  delay(500);
+  ecran.drawCentreString("1", 80, 35, 7); 
+  delay(500);
+
+  // présentation des 4 polices de caractère (2, 4, 6 et 7)
+  // 6 et 7 ne comportent que des chiffres
+  int x = TFT_WHITE;
+  Serial.printf("TFT_WHITE %d   \n",x);
+  x = TFT_BLACK;
+  Serial.printf("TFT_BLACK %d   \n",x);
+  x = TFT_BLUE;
+  Serial.printf("TFT_BLUE %d   \n",x);
+  x = TFT_RED;
+  Serial.printf("TFT_RED %d   \n",x);
+  ecran.fillScreen(TFT_WHITE); // fond blanc
+  ecran.setTextColor(TFT_BLACK); // texte noir
+  ecran.drawString("123", 20, 25, 2); // police #2
+  delay(500);
+  ecran.setTextColor(TFT_DARKGREEN); // texte vert
+  ecran.drawString("123", 10, 70, 4);  // police #4
+  delay(500);
+  ecran.setTextColor(TFT_BLUE); // texte bleu
+  ecran.drawString("123", 60, 10, 6); // police #6: chiffres seulement
+  delay(500);
+  ecran.setTextColor(TFT_RED ); // texte rouge
+  ecran.drawString("123", 50, 60, 7); // police #7: chiffres seulement
+  delay(500);
+
+  // formes géométriques simples
+
+  ecran.fillScreen(TFT_BLACK); // fond noir
+
+  ecran.drawLine(5, 64, 155, 64, TFT_YELLOW);  // ligne horizontale à y = 64
+  ecran.drawLine(80, 5, 80, 123, TFT_YELLOW);  // ligne verticale à x = 80
+  delay(500);
+
+  // contour d'un rectangle x= 15, y = 5, largeur = 50, hauteur = 50, couleur vert
+  ecran.drawRect( 15, 5, 50, 50, TFT_GREENYELLOW); 
+  delay(500);
+  // contour d'un cercle: x = 120, y = 30, rayon = 25, couleur orange
+  ecran.drawCircle(120, 30, 25, TFT_ORANGE); 
+  delay(500);
+  // contour de rectangle à coins arrondis x = 8, y = 80, largeur = 60, hauteur = 30, rayon du coin = 5, couleur rose
+  ecran.drawRoundRect(8, 80, 60, 30, 5, TFT_PINK);  // contour d'un rectangle à coins arrondis
+  delay(500);
+  // contour de triangle x1 = 120 y1 = 70 x2 = 90 y2 = 120 x3 = 150 y3 = 120 couleur cyan
+  ecran.drawTriangle(120, 70, 90, 120, 150, 120, TFT_CYAN);
+  delay(500);
+
+  // même chose, mais avec des formes pleines plutôt que des contours.
+  ecran.fillRect( 15, 5, 50, 50, TFT_GREENYELLOW); 
+  delay(500);
+  ecran.fillCircle(120, 30, 25, TFT_ORANGE); 
+  delay(500);
+  ecran.fillRoundRect(8, 80, 60, 30, 5, TFT_PINK);  
+  delay(500);
+  ecran.fillTriangle(120, 70, 90, 120, 150, 120, TFT_CYAN);  
+
+  delay(500);
+
+  ecran.fillScreen(TFT_YELLOW);
+  //ecran.drawBitmap()
+  // on trace des points au hasard
+  for (int i = 1; i < 10000; i++) {
+    int x = random(159);
+    int y = random(127);
+    ecran.drawPixel(x, y, TFT_BLACK);  // draw pixel: un seul point
+    delay(1);
+  }
+
+}

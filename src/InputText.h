@@ -2,9 +2,6 @@
 #define InputText_H
 #include <pgmspace.h>
 #include <Arduino.h>
-#include <string>
-
-using std::string;
 
 /**
  * @brief Classe permettant de gérer la construction d'une chaine de saisie avec un curseur qui se déplace
@@ -14,7 +11,7 @@ class InputText
 {
 private:
     String possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890 <";
-    String chaine = "";
+    String chaine = "                                                                                     ";
     int positionAct = 0;
     int length = 0;
     int positionPossible = 0;
@@ -44,6 +41,7 @@ public:
     }
     void setTexteBase(String texteBase)
     {
+        Serial.printf("setTexteBase texteBase %s\n", texteBase.c_str());
         if (texteBase.compareTo("") == 0)
         {
             chaine = String("A");
@@ -58,6 +56,8 @@ public:
         positionPossible = DonnePositionPossible(chaine[0]);
 
         length = chaine.length();
+
+        Serial.printf("setTexteBase chaine %s\n", chaine.c_str());
     }
 
     void CaracterePossibleSuivant()
@@ -97,9 +97,12 @@ public:
             positionAct++;
             positionPossible = DonnePositionPossible(chaine[positionAct]);
         }
-        if (positionAct == chaine.length()-1)
+        if (positionAct == chaine.length() - 1)
         {
-            chaine += possible[positionPossible];
+            // on est en bout de chaine...
+            Serial.printf("avant add : %s\n", chaine);
+            chaine = String (chaine + possible[positionPossible]);
+            Serial.printf("après add : %s\n", chaine);
             positionAct++;
         }
     }
@@ -116,9 +119,9 @@ public:
 
     String DonneChaineApres()
     {
-        if (chaine.length() - positionAct == 1)
+        if (chaine.length() - positionAct <= 1)
             return "";
-        return chaine.substring(positionAct + 1, chaine.length() - 1 - positionAct);
+        return chaine.substring(positionAct + 1, chaine.length() - 1);
     }
 };
 
