@@ -2,16 +2,23 @@ Fait : Nouveaux écrans
 Fait : Son impact
 Fait : Son chargeur vide
 TODO : I. Wifi
-A tester : A. classe de saisie par bouton
-A tester : B : Sélectionner le ssid
-A tester : B. sélection du mot de passe
-A tester : C. Une fois ssid sélectionner, choisir clé WPA2
+Fait : A. classe de saisie par bouton
+Fait : B : Sélectionner le ssid
+Fait : B. sélection du mot de passe
+Fait : C. Une fois ssid sélectionner, choisir clé WPA2
+A Ajouter : B Prime : si wifi non sécurisé, passer à la connexion directement.
+Fait : D. Choix du mode de pilotage 
+Fait : D.1 Attente serveur
+A Faire : D.2 Saisie de l'ip du serveur
 
-TODO : II. Serveur
-A. Choix technologie (serveur Apache/PHP avec actualisation JS ?)
-B. Sélection IP Serveur. Nom DNS ?
-C. Paramétrage arme depuis serveur
-D. Paramétrage partie depuis serveur
+
+Commencé : II. Serveur
+Fait : A. Choix technologie (serveur Apache/PHP avec actualisation JS ?) => python !
+Fait : B. Sélection IP Serveur. Nom DNS ? => DHCP !!!
+C. Sélection des joueurs depuis serveur
+D. Paramétrer client depuis serveur (autre ssid et mdp, équipe / Type arme)
+E. Paramétrage partie depuis serveur
+F. Suivre partie depuis serveur
 
 TODO : emetteur et capture infra rouge !
 

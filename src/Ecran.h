@@ -31,7 +31,7 @@ public:
     int memoRestant = -1; // Temps restant dans le compte à rebour
     int positionScanVeille;
     bool veilleEnCours = false;
-    int dureeAvantVeille = 5000; // 5s
+    int dureeAvantVeille = 15000; // 5s
     Ecran() : ecran(),
               spr_tdm(&ecran),
               spr_shd(&ecran),

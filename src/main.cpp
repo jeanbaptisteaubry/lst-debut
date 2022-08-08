@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <AsyncTCP.h>
 #include "Button.h"
 #include "Param.h"
 
@@ -11,12 +12,21 @@
 #include "Ecran.h"
 #include "InputText.h"
 
+#define TCP_SERVEUR_PORT 5000 // Port sur lequel le terminal écoute pour recevoir des requêtes du serveur
+enum ModeConnexionServeur
+{
+  SaisieIp,
+  AttenteServeur
+};
+ModeConnexionServeur modeConnexionServeur = AttenteServeur;
 enum EtatFini
 {
   Initial,
   EnJeuAutonome,
   MortAutonome,
   AttenteWifi,
+  PiloteParWifi_EnAttente,
+
   ConnecteAttenteOrdre,
   ActionPilote,
   EnJeuPilote,
@@ -26,6 +36,9 @@ enum EtatFini
   ChoixSSID,
   ChoixMotDePasse,
   ChoixValidationWifi,
+  ChoixModeSelectionServeur,
+  SaisieIpServeur,  // On saisie l'ip du serveur de gestion des armes
+  AttenteServeurIn, // On attend sur un port que le serveur vienne s'enregistrer
   ChoixEquipe,
   ChoixArme,
   ChoixFin,
@@ -48,11 +61,88 @@ int memoReste = -1;
 int nWifi = 0;
 int iWifi = 0;
 int memoIWifi = 0;
+char last_wifissidOK[200] = "\r";
 unsigned long memoMillis;
 
 InputText inpTxt("");
-
+AsyncServer *server;
 Arme laser(&GameAudio);
+
+bool btnMode1s = false;
+bool btnGachette1s = false;
+bool btnReload1s = false;
+bool btnMode5s = false;
+bool btnGachette5s = false;
+bool btnReload5s = false;
+char datasRecues[1024];
+
+/**
+ * @brief Fonction qui gère les données reçues par le serveur. Attention, cela dépend de l'état
+ *
+ * @param arg
+ * @param client
+ * @param data
+ * @param len
+ */
+static void handleData(void *arg, AsyncClient *client, void *data, size_t len)
+{
+  Serial.printf("\n data received from client %s \n", client->remoteIP().toString().c_str());
+
+  Serial.write((uint8_t *)data, len);
+  int i;
+  for (i = 0; i < len; i++)
+  {
+    datasRecues[i] = ((char *)data)[i];
+  }
+  datasRecues[i] = '\r';
+
+  Serial.printf("%s\n", datasRecues);
+
+  // our big json string test
+  String jsonString = "{\"etat\":\"OK\"}";
+  // reply to client
+  if (client->space() > strlen(jsonString.c_str()) && client->canSend())
+  {
+    client->add(jsonString.c_str(), strlen(jsonString.c_str()));
+    client->send();
+  }
+}
+
+static void handleError(void *arg, AsyncClient *client, int8_t error)
+{
+  Serial.printf("\n connection error %s from client %s \n", client->errorToString(error), client->remoteIP().toString().c_str());
+}
+
+static void handleDisconnect(void *arg, AsyncClient *client)
+{
+  Serial.printf("\n client %s disconnected \n", client->remoteIP().toString().c_str());
+}
+
+static void handleTimeOut(void *arg, AsyncClient *client, uint32_t time)
+{
+  Serial.printf("\n client ACK timeout ip: %s \n", client->remoteIP().toString().c_str());
+}
+
+static void handleConnexionEntrante(void *arg, AsyncClient *client)
+{
+  Serial.printf("\n new client has been connected to server, ip: %s", client->remoteIP().toString().c_str());
+  // register events
+  client->onData(&handleData, NULL);
+  client->onError(&handleError, NULL);
+  client->onDisconnect(&handleDisconnect, NULL);
+  client->onTimeout(&handleTimeOut, NULL);
+}
+
+void serveur_start()
+{
+  if (server == NULL)
+  {
+    server = new AsyncServer(TCP_SERVEUR_PORT); // start listening on tcp port 7050
+    server->onClient(&handleConnexionEntrante, server);
+    server->begin();
+  }
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -75,16 +165,16 @@ void setup()
 
 void loop()
 {
+  btnMode1s = false;
+  btnGachette1s = false;
+  btnReload1s = false;
+  btnMode5s = false;
+  btnGachette5s = false;
+  btnReload5s = false;
 
   btnGachette.MAJ();
   btnMode.MAJ();
   btnReload.MAJ();
-  bool btnMode1s = false;
-  bool btnGachette1s = false;
-  bool btnReload1s = false;
-  bool btnMode5s = false;
-  bool btnGachette5s = false;
-  bool btnReload5s = false;
 
   if (btnGachette.relache)
   {
@@ -95,8 +185,7 @@ void loop()
       btnGachette1s = true;
       Serial.print("BTN Gachette 5s\n");
     }
-    else
-    if (btnGachette.dureeAction >= 1000)
+    else if (btnGachette.dureeAction >= 1000)
     {
       btnGachette1s = true;
       Serial.print("BTN Gachette 1s\n");
@@ -112,8 +201,7 @@ void loop()
       btnReload1s = true;
       Serial.print("BTN Reload 5s\n");
     }
-    else
-     if (btnReload.dureeAction >= 1000)
+    else if (btnReload.dureeAction >= 1000)
     {
       btnReload1s = true;
       Serial.print("BTN Reload 1s\n");
@@ -127,14 +215,14 @@ void loop()
     {
       changementEtat = true;
       btnMode5s = true;
-      btnMode1s = true; 
-      etat = ChoixModePilotage;
+      btnMode1s = true;
+      if (etat != ChoixMotDePasse)
+        etat = ChoixModePilotage;
       Serial.print("BTN MODE 5s\n");
     }
-    else
-    if (btnMode.dureeAction >= 1000)
-    { 
-      btnMode1s = true; 
+    else if (btnMode.dureeAction >= 1000)
+    {
+      btnMode1s = true;
       Serial.print("BTN MODE 1s\n");
     }
     else
@@ -216,9 +304,20 @@ void loop()
 #pragma region AttenteWifi
     if (changementEtat)
     {
-      ecran.effacerEcran();
-      ecran.afficherCentrerNormal("Attendre wifi");
-      memoMillis = millis();
+      char wifi_ssid_tmp[500];
+      sprintf(wifi_ssid_tmp, "%s", param.Wifi_SSID.c_str());
+
+      if (strcmp(last_wifissidOK, wifi_ssid_tmp) == 1)
+      {
+        Serial.printf("Déjà connecté à %s\n", wifi_ssid_tmp);
+        // etat =
+      }
+      else
+      {
+        ecran.effacerEcran();
+        ecran.afficherCentrerNormal("Attendre wifi");
+        memoMillis = millis();
+      }
     }
     else
     {
@@ -262,7 +361,7 @@ void loop()
   case MortPilote:
     break;
   case ChoixModePilotage:
-
+#pragma region ChoixModePilotage
     // Changement de valeur si gachette
     if (btnGachette.relache)
       switch (param.mode)
@@ -323,7 +422,9 @@ void loop()
       }
     }
     break;
+#pragma endregion ChoixModePilotage
   case ChoixSSIDScan:
+#pragma region ChoixSSIDScan
   {
     ecran.effacerEcran();
     ecran.afficherGaucheL1("Sélection du wifi\n");
@@ -349,7 +450,9 @@ void loop()
     etat = ChoixSSID;
   }
   break;
+#pragma endregion ChoixSSIDScan
   case ChoixSSID:
+#pragma region ChoixSSID
     if (!btnMode.relache)
     {
       if (btnGachette.relache && iWifi < nWifi - 1)
@@ -406,79 +509,109 @@ void loop()
         etat = ChoixMotDePasse;
         Serial.printf("param.Wifi_motDePAsse %s \n", param.Wifi_motDePAsse);
 
-        inpTxt.setTexteBase(param.Wifi_motDePAsse);
+        // inpTxt.setTexteBase(param.Wifi_motDePAsse);
+        inpTxt.setTexteBase("523CF66DAF9C23C741137513C6C2FD");
+
         Serial.printf("inpTxt.setTexteBase %s \n", inpTxt.donneTexte());
       }
       }
     }
 
     // On regarde s'il changer de mode
-
+#pragma endregion ChoixSSID
     break;
   case ChoixMotDePasse:
+#pragma region ChoixMotDePasse
   {
     // Action      / Gachette / Reload      / mode
-    // Fini        / Press    / Press
+    // Fini        /          /
     // Lettre UP   /          / Relache
     // Letttre D   / Relache  /
-    // Lettre Next / Relache5S/
-    // Lettre Back /          / Relache5S
+    // Lettre Next / Relache1S/
+    // Lettre Back /          / Relache1S
+    // Effacer Let /          / Relache5S
     // Valider MDP /          /           / Relache 5S
     if (btnMode5s)
     {
       param.Wifi_motDePAsse = String(inpTxt.donneTexte().c_str());
-      Serial.printf("inpTxt.donneTexte %s \n", inpTxt.donneTexte());
+      Serial.printf("Validation MDP\ninpTxt.donneTexte %s \n", inpTxt.donneTexte());
       etat = ChoixValidationWifi;
     }
     else
     {
       bool actSelection = false;
-      if (btnGachette.relache)
+      if (changementEtat)
+      {
+        actSelection = true;
+      }
+
+      if (btnGachette.relache && !(btnGachette1s || btnGachette5s))
       {
         inpTxt.CaracterePossibleSuivant();
         actSelection = true;
       }
-      if (btnReload.relache)
+      if (btnReload.relache && !(btnReload1s || btnReload5s))
       {
         inpTxt.CaracterePossiblePrecedent();
         actSelection = true;
       }
-      if (btnGachette1s || btnMode.relache)
+      if ((btnGachette1s && !btnGachette5s) || (btnMode.relache && !(btnMode1s || btnMode5s)))
       {
         inpTxt.CaractereSelectionSuivant();
         actSelection = true;
       }
-      if (btnReload1s)
+      if (btnReload1s && !btnReload5s)
       {
         inpTxt.CaractereSelectionPrecedent();
         actSelection = true;
       }
 
+      if (btnReload5s)
+      {
+        inpTxt.SupprimerCharAct();
+        actSelection = true;
+      }
       // Il faut afficher !
       if (actSelection)
       {
         ecran.EcranAfficherChoixMdPSSID(inpTxt);
-        //inpTxt.setTexteBase("putainte debarteojkaergbaergaergaergaerg aervaervaerb");
-        char strTmp[500] ;
-        sprintf(strTmp,"inpTxt.donneTexte %s %d\n", inpTxt.donneTexte().c_str(), inpTxt.donneTexte().length()); //Serial.print(strTmp);
+        // inpTxt.setTexteBase("putainte debarteojkaergbaergaergaergaerg aervaervaerb");
+        char strTmp[500];
+        sprintf(strTmp, "inpTxt.donneTexte %s %d\n", inpTxt.donneTexte().c_str(), inpTxt.donneTexte().length()); // Serial.print(strTmp);
         Serial.println(strTmp);
       }
     }
   }
   break;
+#pragma endregion ChoixMotDePasse
   case ChoixValidationWifi:
+#pragma region ChoixValidationWifi
   {
+    Serial.println("Validation Wifi");
     WiFi.mode(WIFI_STA); // Optional
-    char *wifi_ssid;
-    param.Wifi_SSID.toCharArray(wifi_ssid, param.Wifi_SSID.length(), 0);
+                         // char *wifi_ssid;
 
-    char *wifi_pwd;
-    param.Wifi_SSID.toCharArray(wifi_pwd, param.Wifi_motDePAsse.length(), 0);
-    // WiFi.begin(param.Wifi_SSID, param.Wifi_motDePAsse);
+    char wifi_ssid[500];
+    sprintf(wifi_ssid, "%s", param.Wifi_SSID.c_str());
+    Serial.println("1");
+    char wifi_pwd[500];
+    sprintf(wifi_pwd, "%s", param.Wifi_motDePAsse.c_str());
+
+    // strcpy(wifi_ssid, param.Wifi_SSID.c_str());
+    // param.Wifi_SSID.toCharArray(wifi_ssid, param.Wifi_SSID.length(), 0);
+
+    // char *;
+    // strcpy(wifi_pwd, param.Wifi_motDePAsse.c_str());
+    // wifi_pwd = param.Wifi_SSID.c_str();
+    // param.Wifi_SSID.toCharArray(wifi_pwd, param.Wifi_motDePAsse.length(), 0);
+    Serial.println("2");
+    Serial.printf("SSID : %s pwd : %s", wifi_ssid, wifi_pwd);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(wifi_ssid, wifi_pwd);
     Serial.println("\nConnecting");
 
     int countWaiting = 0;
-    int waitingMax = 50;
+    int waitingMax = 250;
     while (WiFi.status() != WL_CONNECTED && countWaiting < waitingMax)
     {
       Serial.print(".");
@@ -491,16 +624,103 @@ void loop()
       Serial.println("\nConnected to the WiFi network");
       Serial.print("Local ESP32 IP: ");
       Serial.println(WiFi.localIP());
-      etat = ChoixFin;
+      etat = ChoixModeSelectionServeur,
+      sprintf(last_wifissidOK, "%s", wifi_ssid);
     }
     else
     {
-      Serial.print("Echec wifi ");
+      Serial.print("Echec wifi \n");
       etat = ChoixSSIDScan;
     }
   }
 
   break;
+#pragma endregion ChoixValidationWifi
+  case ChoixModeSelectionServeur:
+#pragma region ChoixModeSelectionServeur
+  {
+    if (btnGachette.relache)
+    {
+      switch (modeConnexionServeur)
+      {
+      case SaisieIp:
+        modeConnexionServeur = AttenteServeur;
+        break;
+
+      case AttenteServeur:
+        modeConnexionServeur = SaisieIp;
+        break;
+      }
+    }
+
+    if (changementEtat || btnGachette.relache)
+    {
+      ecran.effacerEcran();
+      ecran.afficherGaucheL1("Choix du mode de connexion\n");
+      if (modeConnexionServeur == SaisieIp)
+      {
+        ecran.afficherCentrerAlerte("Saisie Ip\n");
+      }
+      else if (modeConnexionServeur == AttenteServeur)
+      {
+        ecran.afficherCentrerAlerte("Attente serveur\n");
+      }
+    }
+
+    if (!btnMode5s && btnMode.relache)
+    {
+      switch (modeConnexionServeur)
+      {
+      case SaisieIp:
+        etat = SaisieIpServeur;
+        break;
+
+      case AttenteServeur:
+        etat = AttenteServeurIn;
+        break;
+      }
+    }
+  }
+#pragma endregion ChoixModeSelectionServeur
+  break;
+
+  case SaisieIpServeur:
+#pragma region SaisieIpServeur
+    if (changementEtat)
+    {
+      ecran.effacerEcran();
+      ecran.afficherGaucheL1("IP du serveur");
+
+      ecran.afficherCentrerAlerte("IP : not yet!");
+      Serial.printf("IP : not yet!\n");
+    }
+    if (!btnMode5s && btnMode.relache)
+    {
+
+      etat = ChoixModeSelectionServeur;
+    }
+#pragma endregion SaisieIpServeur
+    break;
+
+  case AttenteServeurIn:
+#pragma region AttenteServeurIn
+    if (changementEtat)
+    {
+      Serial.printf("AttenteServeurIn\n");
+      ecran.effacerEcran();
+      ecran.afficherGaucheL1("Attente serveur");
+
+      serveur_start();
+      // ecran.afficherCentrerAlerte("IP : not yet!");
+      //
+    }
+    if (!btnMode5s && btnMode.relache)
+    {
+
+      etat = ChoixModeSelectionServeur;
+    }
+#pragma endregion AttenteServeurIn
+    break;
 
   case ChoixEquipe:
     // Changement de valeur si gachette
@@ -530,7 +750,6 @@ void loop()
     }
     if (!btnMode5s && btnMode.relache)
     {
-
       etat = ChoixArme;
     }
     break;
@@ -550,6 +769,7 @@ void loop()
     }
     break;
   case ChoixFin:
+#pragma region ChoixFin
     if (btnGachette.relache)
     {
       bChoixFin = !bChoixFin;
@@ -585,13 +805,17 @@ void loop()
         etat = ChoixModePilotage;
     }
     break;
+#pragma endregion ChoixFin
   }
 
   if (memoEtat != etat)
     changementEtat = true;
   else
     changementEtat = false;
-
+  
+  //On efface le tempon du serveur
+  sprintf(datasRecues, "");
+  
   ecran.checkVeille();
   if (ecran.veilleEnCours)
     ecran.drawVeille();

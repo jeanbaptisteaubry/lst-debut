@@ -89,6 +89,17 @@ public:
         positionPossible = DonnePositionPossible(chaine[positionAct]);
     }
 
+     void SupprimerCharAct()
+    {
+        char strTmp[500];
+        sprintf(strTmp,"%s%s", DonneChaineAvantAct().c_str(),DonneChaineApres().c_str());
+        chaine = String(strTmp);
+         
+    
+        if (positionAct >= chaine.length())
+            positionAct=chaine.length()-1;
+    }
+
     void CaractereSelectionSuivant()
     {
 
