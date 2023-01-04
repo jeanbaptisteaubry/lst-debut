@@ -1,11 +1,13 @@
 #include <Arduino.h>
 #include <AsyncTCP.h>
 #include "Button.h"
-#include "Param.h"
-
+#include "Param.h" 
+#include "FS.h"
+#include "SPIFFS.h"
 #include <TFT_eSPI.h>
 #include <SPI.h>
 #include <WiFi.h>
+
 #include "Image.h"
 #include "Game_Audio.h"
 #include "Arme.h"
@@ -148,6 +150,7 @@ void setup()
   Serial.begin(115200);
 
   Serial.printf("***** Démarrage *****\n");
+  
   ecran.init();
   randomSeed(140584);
   /* ecran.setRotation(1);

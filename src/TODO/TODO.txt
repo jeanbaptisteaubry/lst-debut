@@ -21,6 +21,64 @@ E. Paramétrage partie depuis serveur
 F. Suivre partie depuis serveur
 
 TODO : emetteur et capture infra rouge !
+Sequence binaire : envoyée et reçue avec codage et parité
+Manque : intégration dans arme // L'envoie en séquence par trois ?
+
+Redo : Le son !
 
 
+https://github.com/open-laser-tag/tagger
 
+Calcul de la résistance avant la diode IR :
+Tension GPIO : 3,3V
+Intensité max délivtée : 15mA= 0,015 => 1.35V
+U = R.I => 1.35V = R. 0,015 => R = 1,35/0,015 =  90 ohm
+
+Règle du pont diviseur 
+U = U1 + U2
+=> 3,3 = U1 + 1,35 => U1 = 1,95 V
+
+U1 = U.R1/(R1 + R2) => R1 + R2 = U.R1/U1 => R2 = U.R1/U1 - R1 = 3,3 x 90 / 1,95 - 90 
+= 62 ohm
+
+
+Intensité max délivrée : 40 mA = 4.10^-2 => 1.5V
+U = R.I => 1.5V = R. 0,04 => R = 1,5/0,04 =  37,5 ohm
+
+Règle du pont diviseur 
+U = U1 + U2
+=> 3,3 = U1 + 1,5 => U1 = 1,8 V
+
+U1 = U.R1/(R1 + R2) => R1 + R2 = U.R1/U1 => R2 = U.R1/U1 - R1 = 3,3 x 37,5 / 1,8 - 37,5 
+= 31,25 ohm
+
+
+electronique
+S8050LT1 : transistor (ALI ?)
+    - Digikey, nom un peu différent, mêmes caractéristiques (meilleure résistance thermique) 
+ESP32 WROOM : ESP32-D0WD-V3
+    - DIGIKEY
+SK24 :https://fr.farnell.com/  Diode schottky
+AMS1117-3.3 : (cmd : ALI) Régulateur de tension
+CP2102 :https://fr.farnell.com/  permet de passer usb en serial
+    - Merde : https://fr.farnell.com/silicon-labs/cp2102n-a02-gqfn28/pont-usb-vers-uart-40-a-85-c/dp/3013848?st=cp2102
+    - emprunte : QFN28 différentes tailles en mm
+    - attention revoir les diodes de protections ?
+    - voir pour intégrer le circuit de charge ?
+Pate à souder : amazon : Doc : https://fr.aliexpress.com/i/32965120517.html?gatewayAdapt=glo2fra
+Plaque à souder : Ali 
+
+Chargement batterie :
+https://emariete.com/en/co2-meter-with-battery-well-done/
+Idée : Reprendre le chemin V3 (du schéma ou 5V5 de la machine) du port ESP, mais le faire réorienter sur le chemin de charge :)
+
+
+Idée : message IR que 13 bits de (0 à 12)... PK 13 ? je ne sais pas
+ bit 0 : 1 bit : paritée
+ bit 1 à 4 : 4 bits - numéro de séquence (chaque tir est envoyé 3 fois mais avec le même id, comme cela on augmente la probabilité que le capteur le prenne)
+ bit 5 à 12 : 8 bits dédié à l'id joueur
+ En mode non connecté, depend du nombre de team (plus il y a de teams différentes)
+    - 2 bits pour la team (4 teams max)
+    - 6 bits pour l'id joueur (128 joueurs max par team)
+En mode connecté, l'association id team / id joueur est gérée par le wifi
+donc 8 bits => 256 joueurs différents.
