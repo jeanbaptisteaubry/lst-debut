@@ -1,3 +1,11 @@
+vacances toussaint : plan
+
+1. Retrouver les docs
+2. Faire migration vers son  MP3
+3. Faire 2 modèle des pistolet qui échange
+4. Faire un prototype de tube lentille
+5. 
+
 Fait : Nouveaux écrans
 Fait : Son impact
 Fait : Son chargeur vide
@@ -25,6 +33,11 @@ Sequence binaire : envoyée et reçue avec codage et parité
 Manque : intégration dans arme // L'envoie en séquence par trois ?
 
 Redo : Le son !
+
+Retrouver le code : pour IR Send / IR Receive
+Son mp3 : retrouver le projet original,
+
+
 
 
 https://github.com/open-laser-tag/tagger

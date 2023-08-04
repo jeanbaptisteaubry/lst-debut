@@ -156,18 +156,23 @@ void setup()
   /* ecran.setRotation(1);
    ecran.fillScreen(TFT_BLACK);
    ecran.setTextColor(TFT_WHITE);*/
+   ecran.effacerEcran();
+   ecran.afficherCentrerNormal("TEST");
+
   // Charge depuis un fichier
-  /*
+  
   if (!SPIFFS.begin(true))
   {
     Serial.println("An Error has occurred while mounting SPIFFS");
     return;
   }
-  */
+  
 }
 
 void loop()
 {
+  ecran.afficherCentrerNormal("TEST");
+  return ;
   btnMode1s = false;
   btnGachette1s = false;
   btnReload1s = false;
