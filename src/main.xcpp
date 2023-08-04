@@ -170,5 +170,5 @@ strip.SetPixelColor(0, hslBlack);
 strip.SetPixelColor(1, hslBlack);
 strip.SetPixelColor(2, hslBlack);
 strip.SetPixelColor(3, hslBlack);
-strip.Show();*/
+strip.Show();*/ 
 }
